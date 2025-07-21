@@ -2,24 +2,20 @@
 // If it’s meant to be a library (not executable),
 //
 //	don’t use go run; instead, import it from a main package.
-package main
+
+// TODO rename to btree?
+package btree
 
 import (
 	"fmt"
 )
 
-//type node struct {
-//	value int
-//	child_l *node
-//	child_r *node
-//}
-
-const N = 3
+const N = 3 // so-called order of the tree
 
 type node struct {
-	keys [N - 1]int // should be len(children)-1 (it's called keys but it's also values)
+	keys [N - 1]int // should be len(children)-1; (it's called keys but it's also values)
 	// value int  //  i'm thinking -1 for no value (when the node is a root or internal)
-	children [N]*node //  an array of pointers? is this right? (size of this array will be subject to restrictions regarding order of the tree)
+	children [N]*node // (size of this array will be subject to restrictions regarding order of the tree)
 }
 
 func buildBTree() node {
@@ -54,9 +50,6 @@ func printBTree(root node) {
 	fmt.Println(*root.children[1].children[1])
 }
 
-// TODO premenovať na "isValueInNode" alebo také niečo -
-// je to viac domain specific
-
 func isValueInNode(array [N - 1]int, val int) bool {
 	for _, el := range array {
 		if el == val {
@@ -78,7 +71,7 @@ func hasValidChildren(node node) bool {
 func determineChild(keys [N - 1]int, val int) int {
 	for idx, key := range keys {
 		if key == -1 {
-			return idx
+			return idx // maybe return -1 in this case and thus end the search?
 		}
 		if val < key {
 			return idx
@@ -97,8 +90,11 @@ func isInBTree(node node, val int) bool {
 		}
 	}
 	return false
-
 }
+
+// TODO use array only on the highest-level
+// in lower functions, use slices for better testability?
+// candidate functions:  determineChild, isValueInNode (could use the .contains method)
 
 func main() {
 	root := buildBTree()
@@ -117,10 +113,6 @@ func main() {
 
 	fmt.Println(isInBTree(root, 8))
 }
-
-// TODO poriešiť git štruktúru, takto:
-// pkdb -> btree
-// a nech git root je v pkdb
 
 // napísať testy - zistiť, ako sa to robí.
 // žeby samostatný pkdb -> test adresár?
