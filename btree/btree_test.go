@@ -32,7 +32,7 @@ func TestBTreeSearch(t *testing.T) {
 }
 
 func TestDetermineChild(t *testing.T) {
-	keys := [2]int{
+	keys := []int{
 		2, 5,
 	}
 

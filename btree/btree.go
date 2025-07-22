@@ -92,7 +92,7 @@ func hasValidChildren(node Node) bool {
 }
 
 // TODO remake this into a method?
-func determineChild(keys [K - 1]int, val int) int {
+func determineChild(keys []int, val int) int {
 	for idx, key := range keys {
 		if key == -1 {
 			return idx // maybe return -1 in this case and thus end the search?
