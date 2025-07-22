@@ -42,6 +42,18 @@ func (node Node) hasValue(val int) bool {
 	return false
 }
 
+func (node Node) determineChild(val int) int {
+	for idx, key := range node.keys {
+		if key == -1 {
+			return idx // maybe return -1 in this case and thus end the search?
+		}
+		if val < key {
+			return idx
+		}
+	}
+	return len(node.keys)
+}
+
 func buildBTree() Node {
 	// lowest level - left
 	lowest_l_l := Node{keys: []int{1, -1}, children: []*Node{}}
@@ -91,25 +103,12 @@ func hasValidChildren(node Node) bool {
 	return false
 }
 
-// TODO remake this into a method?
-func determineChild(keys []int, val int) int {
-	for idx, key := range keys {
-		if key == -1 {
-			return idx // maybe return -1 in this case and thus end the search?
-		}
-		if val < key {
-			return idx
-		}
-	}
-	return K - 1
-}
-
 func isInBTree(node Node, val int) bool {
 	if node.hasValue(val) {
 		return true
 	} else {
 		if hasValidChildren(node) {
-			childToSearch := determineChild(node.keys, val)
+			childToSearch := node.determineChild(val)
 			return isInBTree(*node.children[childToSearch], val)
 		}
 	}

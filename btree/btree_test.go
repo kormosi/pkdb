@@ -32,8 +32,9 @@ func TestBTreeSearch(t *testing.T) {
 }
 
 func TestDetermineChild(t *testing.T) {
-	keys := []int{
-		2, 5,
+	node := Node{
+		keys:     []int{2, 5, 7, 10, 15},
+		children: []*Node{},
 	}
 
 	tests := []struct {
@@ -44,14 +45,14 @@ func TestDetermineChild(t *testing.T) {
 		{"1", 1, 0},
 		{"3", 3, 1},
 		{"6", 6, 2},
-		// {"8", 8, 3},
-		// {"12", 12, 4},
-		// {"17", 17, 5},
+		{"8", 8, 3},
+		{"12", 12, 4},
+		{"17", 17, 5},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := determineChild(keys, tt.value)
+			result := node.determineChild(tt.value)
 			if result != tt.expected {
 				t.Errorf("got %d, want %d", result, tt.expected)
 			}
