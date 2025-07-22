@@ -59,3 +59,10 @@ func TestDetermineChild(t *testing.T) {
 	}
 
 }
+
+func TestInsert(t *testing.T) {
+	btree := buildEmptyBTree()
+
+	insert(btree, 1)
+
+}
