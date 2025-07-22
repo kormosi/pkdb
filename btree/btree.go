@@ -44,24 +44,24 @@ func (node Node) hasValue(val int) bool {
 
 func buildBTree() Node {
 	// lowest level - left
-	lowest_l_l := Node{keys: [K - 1]int{1, -1}, children: [K]*Node{}}
-	lowest_l_r := Node{keys: [K - 1]int{3, -1}, children: [K]*Node{}}
+	lowest_l_l := Node{keys: []int{1, -1}, children: []*Node{}}
+	lowest_l_r := Node{keys: []int{3, -1}, children: []*Node{}}
 	// lowest level - right
-	lowest_r_l := Node{keys: [K - 1]int{5, -1}, children: [K]*Node{}}
-	lowest_r_r := Node{keys: [K - 1]int{7, -1}, children: [K]*Node{}}
+	lowest_r_l := Node{keys: []int{5, -1}, children: []*Node{}}
+	lowest_r_r := Node{keys: []int{7, -1}, children: []*Node{}}
 
 	// mid level
-	mid_l := Node{keys: [K - 1]int{2, -1}, children: [K]*Node{&lowest_l_l, &lowest_l_r}}
-	mid_r := Node{keys: [K - 1]int{6, -1}, children: [K]*Node{&lowest_r_l, &lowest_r_r}}
+	mid_l := Node{keys: []int{2, -1}, children: []*Node{&lowest_l_l, &lowest_l_r}}
+	mid_r := Node{keys: []int{6, -1}, children: []*Node{&lowest_r_l, &lowest_r_r}}
 
 	// top level
-	root := Node{keys: [K - 1]int{4, -1}, children: [K]*Node{&mid_l, &mid_r}}
+	root := Node{keys: []int{4, -1}, children: []*Node{&mid_l, &mid_r}}
 
 	return root
 }
 
 func buildEmptyBTree() Node {
-	root := Node{keys: [K - 1]int{-1, -1}, children: [K]*Node{}}
+	root := Node{keys: []int{-1, -1}, children: []*Node{}}
 	return root
 }
 
