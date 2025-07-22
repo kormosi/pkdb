@@ -15,8 +15,6 @@
 // If it’s meant to be a library (not executable),
 //	don’t use go run; instead, import it from a main package.
 
-// TODO rename to btree?
-
 package btree
 
 import (
@@ -93,6 +91,7 @@ func hasValidChildren(node Node) bool {
 	return false
 }
 
+// TODO remake this into a method?
 func determineChild(keys [N - 1]int, val int) int {
 	for idx, key := range keys {
 		if key == -1 {
