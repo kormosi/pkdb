@@ -23,6 +23,7 @@ import (
 
 const K = 3 // Maximum number of potential search keys for each node in a B-tree
 
+// TODO do samostatného súboru to dať
 type Node struct {
 	keys     []int   // length of this cannot exceed K; (it's called keys, but it's also values for now)
 	children []*Node // length
@@ -135,6 +136,11 @@ func insert(node Node, val int) {
 
 	// If the node contains fewer than the maximum allowed number of elements, then there is room for the new element. Insert the new element in the node, keeping the node's elements ordered.
 }
+
+// TODO pozrieť toto TODO-čko tu dole a pokračovať v konverzii na slice
+
+// Pri insertoch budem musieť enforcovať veľkosť, ale to spravím potom na maine
+// mergnúť túto branchu do main
 
 // TODO use array only on the highest-level
 // in lower functions, use slices for better testability?
