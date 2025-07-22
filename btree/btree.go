@@ -1,9 +1,22 @@
-// from gipiti:
+// Tidbits from wiki and gipiti:
+
+// Regarding BTrees:
+
+// Usually, the number of keys is chosen to vary between d and 2d,
+// where d is the minimum number of keys, and d+1 is the minimum
+// branching factor of the tree.
+
+// Great link that shows the node structure (with data records)
+// https://en.wikipedia.org/wiki/B-tree#Node_structure
+// I will need to re-work my implementation according to this.
+
+// Regarding go modules and packages
+
 // If it’s meant to be a library (not executable),
-//
 //	don’t use go run; instead, import it from a main package.
 
 // TODO rename to btree?
+
 package btree
 
 import (
