@@ -25,31 +25,51 @@ import (
 
 const N = 3 // so-called order of the tree
 
-type node struct {
+type Node struct {
 	keys [N - 1]int // should be len(children)-1; (it's called keys but it's also values)
 	// value int  //  i'm thinking -1 for no value (when the node is a root or internal)
-	children [N]*node // (size of this array will be subject to restrictions regarding order of the tree)
+	children [N]*Node // (size of this array will be subject to restrictions regarding order of the tree)
 }
 
-func buildBTree() node {
+func (node Node) hasFreeRoom() bool {
+	return node.hasValue(-1)
+}
+
+func (node Node) hasValue(val int) bool {
+	for _, el := range node.keys {
+		if el == val {
+			return true
+		}
+	}
+	return false
+}
+
+func buildBTree() Node {
 	// lowest level - left
-	lowest_l_l := node{keys: [N - 1]int{1, -1}, children: [N]*node{}}
-	lowest_l_r := node{keys: [N - 1]int{3, -1}, children: [N]*node{}}
+	lowest_l_l := Node{keys: [N - 1]int{1, -1}, children: [N]*Node{}}
+	lowest_l_r := Node{keys: [N - 1]int{3, -1}, children: [N]*Node{}}
 	// lowest level - right
-	lowest_r_l := node{keys: [N - 1]int{5, -1}, children: [N]*node{}}
-	lowest_r_r := node{keys: [N - 1]int{7, -1}, children: [N]*node{}}
+	lowest_r_l := Node{keys: [N - 1]int{5, -1}, children: [N]*Node{}}
+	lowest_r_r := Node{keys: [N - 1]int{7, -1}, children: [N]*Node{}}
 
 	// mid level
-	mid_l := node{keys: [N - 1]int{2, -1}, children: [N]*node{&lowest_l_l, &lowest_l_r}}
-	mid_r := node{keys: [N - 1]int{6, -1}, children: [N]*node{&lowest_r_l, &lowest_r_r}}
+	mid_l := Node{keys: [N - 1]int{2, -1}, children: [N]*Node{&lowest_l_l, &lowest_l_r}}
+	mid_r := Node{keys: [N - 1]int{6, -1}, children: [N]*Node{&lowest_r_l, &lowest_r_r}}
 
 	// top level
-	root := node{keys: [N - 1]int{4, -1}, children: [N]*node{&mid_l, &mid_r}}
+	root := Node{keys: [N - 1]int{4, -1}, children: [N]*Node{&mid_l, &mid_r}}
 
 	return root
 }
 
-func printBTree(root node) {
+func buildEmptyBTree() Node {
+	root := Node{keys: [N - 1]int{-1, -1}, children: [N]*Node{}}
+	return root
+}
+
+func printBTree(root Node) {
+	// TODO write a complementary function "traverseBtree"
+	// that will parse and (optionally) print each and every node?
 	fmt.Println(root)
 	fmt.Println()
 	fmt.Println(*root.children[0])
@@ -63,16 +83,8 @@ func printBTree(root node) {
 	fmt.Println(*root.children[1].children[1])
 }
 
-func isValueInNode(array [N - 1]int, val int) bool {
-	for _, el := range array {
-		if el == val {
-			return true
-		}
-	}
-	return false
-}
-
-func hasValidChildren(node node) bool {
+// TODO remake this into a method?
+func hasValidChildren(node Node) bool {
 	for _, child := range node.children {
 		if child != nil {
 			return true
@@ -93,8 +105,8 @@ func determineChild(keys [N - 1]int, val int) int {
 	return N - 1
 }
 
-func isInBTree(node node, val int) bool {
-	if isValueInNode(node.keys, val) {
+func isInBTree(node Node, val int) bool {
+	if node.hasValue(val) {
 		return true
 	} else {
 		if hasValidChildren(node) {
@@ -103,6 +115,27 @@ func isInBTree(node node, val int) bool {
 		}
 	}
 	return false
+}
+
+func insert(node Node, val int) {
+	// All insertions start at a leaf node.
+
+	// To insert a new element, search the tree to find the leaf node where the new element should be added.
+	if node.hasFreeRoom() {
+		// TODO: if el == -1, add val instead of el
+		for idx, el := range node.keys {
+			if el == -1 {
+				node.keys[idx] = val
+			}
+		}
+
+		// Then sort
+
+	}
+
+	// Insert the new element into that node with the following steps:
+
+	// If the node contains fewer than the maximum allowed number of elements, then there is room for the new element. Insert the new element in the node, keeping the node's elements ordered.
 }
 
 // TODO use array only on the highest-level
