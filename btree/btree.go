@@ -24,9 +24,9 @@ import (
 const K = 3 // Maximum number of potential search keys for each node in a B-tree
 
 type Node struct {
-	keys [K - 1]int // should be len(children)-1; (it's called keys but it's also values)
-	// value int  //  i'm thinking -1 for no value (when the node is a root or internal)
-	children [K]*Node // (size of this array will be subject to restrictions regarding order of the tree)
+	keys     []int   // length of this cannot exceed K; (it's called keys, but it's also values for now)
+	children []*Node // length
+	// leaf bool	 // possibly needed in future?
 }
 
 func (node Node) hasFreeRoom() bool {
