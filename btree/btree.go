@@ -21,12 +21,12 @@ import (
 	"fmt"
 )
 
-const N = 3 // so-called order of the tree
+const K = 3 // Maximum number of potential search keys for each node in a B-tree
 
 type Node struct {
-	keys [N - 1]int // should be len(children)-1; (it's called keys but it's also values)
+	keys [K - 1]int // should be len(children)-1; (it's called keys but it's also values)
 	// value int  //  i'm thinking -1 for no value (when the node is a root or internal)
-	children [N]*Node // (size of this array will be subject to restrictions regarding order of the tree)
+	children [K]*Node // (size of this array will be subject to restrictions regarding order of the tree)
 }
 
 func (node Node) hasFreeRoom() bool {
@@ -44,24 +44,24 @@ func (node Node) hasValue(val int) bool {
 
 func buildBTree() Node {
 	// lowest level - left
-	lowest_l_l := Node{keys: [N - 1]int{1, -1}, children: [N]*Node{}}
-	lowest_l_r := Node{keys: [N - 1]int{3, -1}, children: [N]*Node{}}
+	lowest_l_l := Node{keys: [K - 1]int{1, -1}, children: [K]*Node{}}
+	lowest_l_r := Node{keys: [K - 1]int{3, -1}, children: [K]*Node{}}
 	// lowest level - right
-	lowest_r_l := Node{keys: [N - 1]int{5, -1}, children: [N]*Node{}}
-	lowest_r_r := Node{keys: [N - 1]int{7, -1}, children: [N]*Node{}}
+	lowest_r_l := Node{keys: [K - 1]int{5, -1}, children: [K]*Node{}}
+	lowest_r_r := Node{keys: [K - 1]int{7, -1}, children: [K]*Node{}}
 
 	// mid level
-	mid_l := Node{keys: [N - 1]int{2, -1}, children: [N]*Node{&lowest_l_l, &lowest_l_r}}
-	mid_r := Node{keys: [N - 1]int{6, -1}, children: [N]*Node{&lowest_r_l, &lowest_r_r}}
+	mid_l := Node{keys: [K - 1]int{2, -1}, children: [K]*Node{&lowest_l_l, &lowest_l_r}}
+	mid_r := Node{keys: [K - 1]int{6, -1}, children: [K]*Node{&lowest_r_l, &lowest_r_r}}
 
 	// top level
-	root := Node{keys: [N - 1]int{4, -1}, children: [N]*Node{&mid_l, &mid_r}}
+	root := Node{keys: [K - 1]int{4, -1}, children: [K]*Node{&mid_l, &mid_r}}
 
 	return root
 }
 
 func buildEmptyBTree() Node {
-	root := Node{keys: [N - 1]int{-1, -1}, children: [N]*Node{}}
+	root := Node{keys: [K - 1]int{-1, -1}, children: [K]*Node{}}
 	return root
 }
 
@@ -92,7 +92,7 @@ func hasValidChildren(node Node) bool {
 }
 
 // TODO remake this into a method?
-func determineChild(keys [N - 1]int, val int) int {
+func determineChild(keys [K - 1]int, val int) int {
 	for idx, key := range keys {
 		if key == -1 {
 			return idx // maybe return -1 in this case and thus end the search?
@@ -101,7 +101,7 @@ func determineChild(keys [N - 1]int, val int) int {
 			return idx
 		}
 	}
-	return N - 1
+	return K - 1
 }
 
 func isInBTree(node Node, val int) bool {
