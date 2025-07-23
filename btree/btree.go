@@ -19,6 +19,7 @@ package btree
 
 import (
 	"fmt"
+	"slices"
 )
 
 const K = 3 // Maximum number of potential search keys for each node in a B-tree
@@ -35,12 +36,7 @@ func (node Node) hasFreeRoom() bool {
 }
 
 func (node Node) hasValue(val int) bool {
-	for _, el := range node.keys {
-		if el == val {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(node.keys, val)
 }
 
 func (node Node) determineChild(val int) int {
