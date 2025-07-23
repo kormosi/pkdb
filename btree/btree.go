@@ -55,6 +55,15 @@ func (node Node) determineChild(val int) int {
 	return len(node.keys)
 }
 
+func (node Node) hasValidChildren() bool {
+	for _, child := range node.children {
+		if child != nil {
+			return true
+		}
+	}
+	return false
+}
+
 func buildBTree() Node {
 	// lowest level - left
 	lowest_l_l := Node{keys: []int{1, -1}, children: []*Node{}}
@@ -94,21 +103,11 @@ func printBTree(root Node) {
 	fmt.Println(*root.children[1].children[1])
 }
 
-// TODO remake this into a method?
-func hasValidChildren(node Node) bool {
-	for _, child := range node.children {
-		if child != nil {
-			return true
-		}
-	}
-	return false
-}
-
 func isInBTree(node Node, val int) bool {
 	if node.hasValue(val) {
 		return true
 	} else {
-		if hasValidChildren(node) {
+		if node.hasValidChildren() {
 			childToSearch := node.determineChild(val)
 			return isInBTree(*node.children[childToSearch], val)
 		}
