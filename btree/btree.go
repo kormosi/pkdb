@@ -122,7 +122,6 @@ func insert(node Node, val int) {
 
 	// To insert a new element, search the tree to find the leaf node where the new element should be added.
 	if node.hasFreeRoom() {
-		// TODO: if el == -1, add val instead of el
 		for idx, el := range node.keys {
 			if el == -1 {
 				node.keys[idx] = val
@@ -138,20 +137,14 @@ func insert(node Node, val int) {
 	// If the node contains fewer than the maximum allowed number of elements, then there is room for the new element. Insert the new element in the node, keeping the node's elements ordered.
 }
 
-// TODO pozrieť toto TODO-čko tu dole a pokračovať v konverzii na slice
-
 // Pri insertoch budem musieť enforcovať veľkosť, ale to spravím potom na maine
 // mergnúť túto branchu do main
 
-// TODO use array only on the highest-level
-// in lower functions, use slices for better testability?
-// candidate functions:  determineChild, isValueInNode (could use the .contains method)
-
 func main() {
-	root := buildBTree()
-	printBTree(root)
+	// root := buildBTree()
+	// printBTree(root)
 
-	fmt.Println()
+	// fmt.Println()
 
 	// TODO otestovať to s viacerými hodnotami
 	// fmt.Println(isInBTree(root, 4))
@@ -162,7 +155,9 @@ func main() {
 	// fmt.Println(isInBTree(root, 5))
 	// fmt.Println(isInBTree(root, 7))
 
-	fmt.Println(isInBTree(root, 8))
+	// fmt.Println(isInBTree(root, 8))
+
+	buildEmptyBTree(3)
 }
 
 // napísať testy - zistiť, ako sa to robí.
