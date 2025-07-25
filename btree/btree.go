@@ -78,8 +78,14 @@ func buildBTree() Node {
 	return root
 }
 
-func buildEmptyBTree() Node {
-	root := Node{keys: []int{-1, -1}, children: []*Node{}}
+func buildEmptyBTree(K int) Node {
+	children := make([]*Node, K)
+	keys := make([]int, K)
+	for i := range keys {
+		keys[i] = -1
+	}
+	root := Node{keys: keys, children: children}
+	fmt.Println(children)
 	return root
 }
 
