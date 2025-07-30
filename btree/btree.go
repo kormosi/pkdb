@@ -26,13 +26,13 @@ const K = 3 // Maximum number of potential search keys for each node in a B-tree
 
 // TODO do samostatného súboru to dať
 type Node struct {
-	keys     []int   // length of this cannot exceed K; (it's called keys, but it's also values for now)
-	children []*Node // length
+	keys     []int // length of this cannot exceed K; (it's called keys, but it's also values for now)
+	children []*Node
 	// leaf bool	 // possibly needed in future?
 }
 
 func (node Node) hasFreeRoom() bool {
-	return node.hasValue(-1)
+	return len(node.keys) <= K-1
 }
 
 func (node Node) hasValue(val int) bool {
@@ -78,15 +78,11 @@ func buildBTree() Node {
 	return root
 }
 
-func buildEmptyBTree(K int) Node {
-	children := make([]*Node, K)
-	keys := make([]int, K)
-	for i := range keys {
-		keys[i] = -1
-	}
+func buildEmptyBTree() *Node {
+	children := []*Node{}
+	keys := []int{}
 	root := Node{keys: keys, children: children}
-	fmt.Println(children)
-	return root
+	return &root
 }
 
 func printBTree(root Node) {
@@ -117,24 +113,23 @@ func isInBTree(node Node, val int) bool {
 	return false
 }
 
-func insert(node Node, val int) {
+func insert(node *Node, val int) {
 	// All insertions start at a leaf node.
-
 	// To insert a new element, search the tree to find the leaf node where the new element should be added.
+
+	// If the node contains fewer than the maximum allowed number of elements, then there is room for the new element. 
+	// Insert the new element in the node, keeping the node's elements ordered.
 	if node.hasFreeRoom() {
-		for idx, el := range node.keys {
-			if el == -1 {
-				node.keys[idx] = val
-			}
-		}
-
-		// Then sort
-
+		node.keys = append(node.keys, val)
+		slices.Sort(node.keys)
 	}
+	// Otherwise the node is full, evenly split it into two nodes so: 
 
-	// Insert the new element into that node with the following steps:
 
-	// If the node contains fewer than the maximum allowed number of elements, then there is room for the new element. Insert the new element in the node, keeping the node's elements ordered.
+}
+
+func printSlice(s []int) {
+	fmt.Printf("len=%d cap=%d %v\n", len(s), cap(s), s)
 }
 
 // Pri insertoch budem musieť enforcovať veľkosť, ale to spravím potom na maine
@@ -157,7 +152,7 @@ func main() {
 
 	// fmt.Println(isInBTree(root, 8))
 
-	buildEmptyBTree(3)
+	// buildEmptyBTree()
 }
 
 // napísať testy - zistiť, ako sa to robí.

@@ -1,6 +1,9 @@
 package btree
 
-import "testing"
+import (
+	"reflect"
+	"testing"
+)
 
 func TestBTreeSearch(t *testing.T) {
 	tests := []struct {
@@ -62,8 +65,14 @@ func TestDetermineChild(t *testing.T) {
 }
 
 func TestInsert(t *testing.T) {
-	btree := buildEmptyBTree()
+	emptyBtree := buildEmptyBTree()
+	expected := []int{1, 2}
 
-	insert(btree, 1)
+	insert(emptyBtree, 2)
+	insert(emptyBtree, 1)
+
+	if !reflect.DeepEqual(emptyBtree.keys, expected) {
+		t.Errorf("got %d, want %d", emptyBtree.keys, expected)
+	}
 
 }
