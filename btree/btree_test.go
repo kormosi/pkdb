@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestBTreeSearch(t *testing.T) {
+func TestIsInBtree(t *testing.T) {
 	tests := []struct {
 		name     string
 		value    int
@@ -64,15 +64,38 @@ func TestDetermineChild(t *testing.T) {
 
 }
 
-func TestInsert(t *testing.T) {
+func TestInsertWithoutNodeSplitting(t *testing.T) {
 	emptyBtree := buildEmptyBTree()
 	expected := []int{1, 2}
 
-	insert(emptyBtree, 2)
-	insert(emptyBtree, 1)
+	emptyBtree.insert(2)
+	emptyBtree.insert(1)
 
 	if !reflect.DeepEqual(emptyBtree.keys, expected) {
 		t.Errorf("got %d, want %d", emptyBtree.keys, expected)
 	}
+}
 
+func TestInsertWithNodeSplitting(t *testing.T) {
+	emptyBtree := buildEmptyBTree()
+	expectedRoot := []int{2}
+	expectedLeftChild := []int{1}
+	expectedRightChild := []int{3}
+
+	emptyBtree.insert(2)
+	emptyBtree.insert(1)
+	// This should trigger the splitting of the node
+	newRootNode := emptyBtree.insert(3)
+
+	// TODO make these asserts more compact?
+	// e.g. by for i,j in zip([root, lchild, rchild], [expectedRoot, elc, erc])
+	if !reflect.DeepEqual(newRootNode.keys, expectedRoot) {
+		t.Errorf("got %d, want %d", newRootNode.keys, expectedRoot)
+	}
+	if !reflect.DeepEqual(newRootNode.children[0].keys, expectedLeftChild) {
+		t.Errorf("got %d, want %d", newRootNode.children[0].keys, expectedLeftChild)
+	}
+	if !reflect.DeepEqual(newRootNode.children[1].keys, expectedRightChild) {
+		t.Errorf("got %d, want %d", newRootNode.children[1].keys, expectedRightChild)
+	}
 }
