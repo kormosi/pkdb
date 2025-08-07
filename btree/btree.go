@@ -62,16 +62,14 @@ func (node Node) hasChildren() bool {
 	return false
 }
 
-func (node *Node) insert(val int) *Node {
-	// All insertions start at a leaf node.
-	// TODO: the above is important. We should never start at the root node.
-	// We need an algorithm for traversing the tree and finding the value.
+func (root *Node) insert(val int) *Node {
+	// TODO cleanup this method
 
 	// To insert a new element, search the tree to find the leaf node where the new element should be added.
-
+	node := findSuitableNodeForInsertion(root, val)
 	// If the node contains fewer than the maximum allowed number of elements, then there is room for the new element.
-	// Insert the new element in the node, keeping the node's elements ordered.
 	if node.hasFreeRoom() {
+		// Insert the new element in the node, keeping the node's elements ordered.
 		node.keys = append(node.keys, val)
 		slices.Sort(node.keys)
 		return node
@@ -106,18 +104,18 @@ func (node *Node) insert(val int) *Node {
 
 func buildBTree() Node {
 	// lowest level - left
-	lowest_l_l := Node{keys: []int{1, -1}, children: []*Node{}}
-	lowest_l_r := Node{keys: []int{3, -1}, children: []*Node{}}
+	lowest_l_l := Node{keys: []int{1}, children: []*Node{}}
+	lowest_l_r := Node{keys: []int{3}, children: []*Node{}}
 	// lowest level - right
-	lowest_r_l := Node{keys: []int{5, -1}, children: []*Node{}}
-	lowest_r_r := Node{keys: []int{7, -1}, children: []*Node{}}
+	lowest_r_l := Node{keys: []int{5}, children: []*Node{}}
+	lowest_r_r := Node{keys: []int{7}, children: []*Node{}}
 
 	// mid level
-	mid_l := Node{keys: []int{2, -1}, children: []*Node{&lowest_l_l, &lowest_l_r}}
-	mid_r := Node{keys: []int{6, -1}, children: []*Node{&lowest_r_l, &lowest_r_r}}
+	mid_l := Node{keys: []int{2}, children: []*Node{&lowest_l_l, &lowest_l_r}}
+	mid_r := Node{keys: []int{6}, children: []*Node{&lowest_r_l, &lowest_r_r}}
 
 	// top level
-	root := Node{keys: []int{4, -1}, children: []*Node{&mid_l, &mid_r}}
+	root := Node{keys: []int{4}, children: []*Node{&mid_l, &mid_r}}
 
 	return root
 }
@@ -145,6 +143,7 @@ func printBTree(root Node) {
 	fmt.Println(*root.children[1].children[1])
 }
 
+// TODO maybe this function can be deprecated?
 func isInBTree(node Node, val int) bool {
 	if node.hasValue(val) {
 		return true
@@ -155,6 +154,19 @@ func isInBTree(node Node, val int) bool {
 		}
 	}
 	return false
+}
+
+// TODO what if value already is in the Btree?
+// Should we concern ourselves with such a possiblity?
+// Maybe it won't happen when used in DB, because of hashing
+// Then again, collisions can happen, so maybe it should be handled
+func findSuitableNodeForInsertion(node *Node, val int) *Node {
+	if node.hasChildren() {
+		childToSearchIndex := node.determineChildIndex(val)
+		return findSuitableNodeForInsertion(node.children[childToSearchIndex], val)
+	} else {
+		return node
+	}
 }
 
 func printSlice(s []int) {

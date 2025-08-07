@@ -64,6 +64,17 @@ func TestDetermineChild(t *testing.T) {
 
 }
 
+func TestFindSuitableNodeForInsertion(t *testing.T) {
+	// Not an exhaustive test but we'll hope it's enough for now
+	// Could be made better by creating trees of different levels here as params
+	btree := buildBTree()
+	expected := []int{7}
+	nodeFound := findSuitableNodeForInsertion(&btree, 8)
+	if !reflect.DeepEqual(nodeFound.keys, expected) {
+		t.Errorf("got %d, want %d", nodeFound.keys, expected)
+	}
+}
+
 func TestInsertWithoutNodeSplitting(t *testing.T) {
 	emptyBtree := buildEmptyBTree()
 	expected := []int{1, 2}
@@ -77,6 +88,8 @@ func TestInsertWithoutNodeSplitting(t *testing.T) {
 }
 
 func TestInsertWithNodeSplitting(t *testing.T) {
+	// TODO test-case pre každý frame obrázku tohto obrázku:
+	// https://upload.wikimedia.org/wikipedia/commons/3/33/B_tree_insertion_example.png
 	emptyBtree := buildEmptyBTree()
 	expectedRoot := []int{2}
 	expectedLeftChild := []int{1}
