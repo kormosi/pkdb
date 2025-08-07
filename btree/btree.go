@@ -161,9 +161,6 @@ func printSlice(s []int) {
 	fmt.Printf("len=%d cap=%d %v\n", len(s), cap(s), s)
 }
 
-// Pri insertoch budem musieť enforcovať veľkosť, ale to spravím potom na maine
-// mergnúť túto branchu do main
-
 func main() {
 	// root := buildBTree()
 	// printBTree(root)
@@ -183,6 +180,3 @@ func main() {
 
 	// buildEmptyBTree()
 }
-
-// napísať testy - zistiť, ako sa to robí.
-// žeby samostatný pkdb -> test adresár?
