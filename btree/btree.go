@@ -41,7 +41,7 @@ func (node Node) hasValue(val int) bool {
 	return slices.Contains(node.keys, val)
 }
 
-func (node Node) determineChild(val int) int {
+func (node Node) determineChildIndex(val int) int {
 	for idx, key := range node.keys {
 		if key == -1 {
 			return idx // maybe return -1 in this case and thus end the search?
@@ -150,8 +150,8 @@ func isInBTree(node Node, val int) bool {
 		return true
 	} else {
 		if node.hasValidChildren() {
-			childToSearch := node.determineChild(val)
-			return isInBTree(*node.children[childToSearch], val)
+			childToSearchIndex := node.determineChildIndex(val)
+			return isInBTree(*node.children[childToSearchIndex], val)
 		}
 	}
 	return false

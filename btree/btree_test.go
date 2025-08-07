@@ -55,7 +55,7 @@ func TestDetermineChild(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := node.determineChild(tt.value)
+			result := node.determineChildIndex(tt.value)
 			if result != tt.expected {
 				t.Errorf("got %d, want %d", result, tt.expected)
 			}
