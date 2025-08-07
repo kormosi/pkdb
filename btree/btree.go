@@ -53,7 +53,7 @@ func (node Node) determineChildIndex(val int) int {
 	return len(node.keys)
 }
 
-func (node Node) hasValidChildren() bool {
+func (node Node) hasChildren() bool {
 	for _, child := range node.children {
 		if child != nil {
 			return true
@@ -149,7 +149,7 @@ func isInBTree(node Node, val int) bool {
 	if node.hasValue(val) {
 		return true
 	} else {
-		if node.hasValidChildren() {
+		if node.hasChildren() {
 			childToSearchIndex := node.determineChildIndex(val)
 			return isInBTree(*node.children[childToSearchIndex], val)
 		}
