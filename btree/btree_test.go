@@ -90,25 +90,52 @@ func TestInsertWithoutNodeSplitting(t *testing.T) {
 func TestInsertWithNodeSplitting(t *testing.T) {
 	// TODO test-case pre každý frame obrázku tohto obrázku:
 	// https://upload.wikimedia.org/wikipedia/commons/3/33/B_tree_insertion_example.png
-	emptyBtree := buildEmptyBTree()
+
+	// akonáhle spravím test pre každú úroveň z toho obrázku
+	// tak môžem urobiť pomocou insert metódy aký strom ja chcem
+	// a tým pádom rýchlo otestovať TestFindSuitableNodeForInsertion - aj keď
+	// je to taký chicken-egg problém, lebo insert samotný používa TestFindSuitableNodeForInsertion
+
+	btree := buildEmptyBTree()
+	btree.insert(1)
+	expectedKeys := []int{1}
+	if !reflect.DeepEqual(btree.keys, expectedKeys) {
+		t.Errorf("got %d, want %d", btree.keys, expectedKeys)
+	}
+
+	btree.insert(2)
+	expectedKeys = []int{1, 2}
+	if !reflect.DeepEqual(btree.keys, expectedKeys) {
+		t.Errorf("got %d, want %d", btree.keys, expectedKeys)
+	}
+
+	// This should trigger the splitting of the node
+	btree = btree.insert(3)
 	expectedRoot := []int{2}
 	expectedLeftChild := []int{1}
 	expectedRightChild := []int{3}
+	if !reflect.DeepEqual(btree.keys, expectedRoot) {
+		t.Errorf("got %d, want %d", btree.keys, expectedRoot)
+	}
+	if !reflect.DeepEqual(btree.children[0].keys, expectedLeftChild) {
+		t.Errorf("got %d, want %d", btree.children[0].keys, expectedLeftChild)
+	}
+	if !reflect.DeepEqual(btree.children[1].keys, expectedRightChild) {
+		t.Errorf("got %d, want %d", btree.children[1].keys, expectedRightChild)
+	}
 
-	emptyBtree.insert(2)
-	emptyBtree.insert(1)
-	// This should trigger the splitting of the node
-	newRootNode := emptyBtree.insert(3)
+	btree = btree.insert(4)
+	expectedRoot = []int{2}
+	expectedLeftChild = []int{1}
+	expectedRightChild = []int{3, 4}
+	if !reflect.DeepEqual(btree.keys, expectedRoot) {
+		t.Errorf("got %d, want %d", btree.keys, expectedRoot)
+	}
+	if !reflect.DeepEqual(btree.children[0].keys, expectedLeftChild) {
+		t.Errorf("got %d, want %d", btree.children[0].keys, expectedLeftChild)
+	}
+	if !reflect.DeepEqual(btree.children[1].keys, expectedRightChild) {
+		t.Errorf("got %d, want %d", btree.children[1].keys, expectedRightChild)
+	}
 
-	// TODO make these asserts more compact?
-	// e.g. by for i,j in zip([root, lchild, rchild], [expectedRoot, elc, erc])
-	if !reflect.DeepEqual(newRootNode.keys, expectedRoot) {
-		t.Errorf("got %d, want %d", newRootNode.keys, expectedRoot)
-	}
-	if !reflect.DeepEqual(newRootNode.children[0].keys, expectedLeftChild) {
-		t.Errorf("got %d, want %d", newRootNode.children[0].keys, expectedLeftChild)
-	}
-	if !reflect.DeepEqual(newRootNode.children[1].keys, expectedRightChild) {
-		t.Errorf("got %d, want %d", newRootNode.children[1].keys, expectedRightChild)
-	}
 }

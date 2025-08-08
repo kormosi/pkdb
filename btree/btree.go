@@ -72,7 +72,7 @@ func (root *Node) insert(val int) *Node {
 		// Insert the new element in the node, keeping the node's elements ordered.
 		node.keys = append(node.keys, val)
 		slices.Sort(node.keys)
-		return node
+		return root
 	} else {
 		// Otherwise the node is full, evenly split it into two nodes so:
 		// 1: A single median is chosen from among the leaf's elements and the new element that is being inserted.
@@ -91,8 +91,8 @@ func (root *Node) insert(val int) *Node {
 
 		// 3: The separation value is inserted in the node's parent...
 		if node.parent == nil {
-			newRootNode := Node{keys: []int{temporaryKeySlice[medianIndex]}, children: []*Node{node, &newRightNode}}
-			return &newRootNode
+			newRoot := Node{keys: []int{temporaryKeySlice[medianIndex]}, children: []*Node{node, &newRightNode}}
+			return &newRoot
 		} else {
 			// ... which may cause it to be split, and so on. If the node has no parent (i.e., the node was the root), create a new root above this node (increasing the height of the tree).
 			// TODO not yet implemented, returning empty node pointer
