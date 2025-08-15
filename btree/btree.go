@@ -62,10 +62,17 @@ func (node Node) hasChildren() bool {
 	return false
 }
 
+func (node *Node) createChildParentPointers() {
+	for _, child := range node.children {
+		child.parent = node
+	}
+}
+
 func (root *Node) insert(val int) *Node {
 	// TODO cleanup this method
 
 	// To insert a new element, search the tree to find the leaf node where the new element should be added.
+
 	node := findSuitableNodeForInsertion(root, val)
 	// If the node contains fewer than the maximum allowed number of elements, then there is room for the new element.
 	if node.hasFreeRoom() {
@@ -75,7 +82,7 @@ func (root *Node) insert(val int) *Node {
 		return root
 	} else {
 		// Otherwise the node is full, evenly split it into two nodes so:
-		// 1: A single median is chosen from among the leaf's elements and the new element that is being inserted.
+		// A single median is chosen from among the leaf's elements and the new element that is being inserted.
 		// Patrik's notes: choosing a single median will be easy if there's 2 keys + 1 new key (3 total, so just choose index 1, that is, the second element)
 		// This won't work for non-odd K values, but I guess it's good for now.
 
@@ -85,24 +92,34 @@ func (root *Node) insert(val int) *Node {
 		medianIndex := K / 2
 		temporaryKeySlice := node.keys
 
-		// 2: Values less than the median are put in the new left node, and values greater than the median are put in the new right node, with the median acting as a separation value.
-		node.keys = temporaryKeySlice[:medianIndex] // The original node becomes the new left node
+		// Values less than the median are put in the new left node, and values greater than the median are put in the new right node, with the median acting as a separation value.
+		// TODO rename node.keys to newLeftNode so that it's more obvious?
+		node.keys = temporaryKeySlice[:medianIndex] // The original node becomes the newLeftNode
 		newRightNode := Node{keys: temporaryKeySlice[medianIndex+1:], children: []*Node{}}
+		separationValue := temporaryKeySlice[medianIndex]
 
-		// 3: The separation value is inserted in the node's parent...
 		if node.parent == nil {
-			newRoot := Node{keys: []int{temporaryKeySlice[medianIndex]}, children: []*Node{node, &newRightNode}}
+			// If the node has no parent (i.e., the node was the root),
+			// create a new root above this node (increasing the height of the tree).
+			newRoot := Node{keys: []int{separationValue}, children: []*Node{node, &newRightNode}}
+			newRoot.createChildParentPointers()
 			return &newRoot
 		} else {
-			// ... which may cause it to be split, and so on. If the node has no parent (i.e., the node was the root), create a new root above this node (increasing the height of the tree).
-			// TODO not yet implemented, returning empty node pointer
-			return &Node{keys: []int{}, children: []*Node{}}
+			// Else, the separation value is inserted in the node's parent which may cause it to be split, and so on.
+
+			// TODO tu treba zistiť, či parent má voľné miesto medzi children
+			// možno sa to rieši automagicky tým algoritmom samo...
+			// ale možno nie
+			// čiže pridať check na voľné miesto mezdi children
+			// a potom tie children nejak našróbovať na parenta
+			// a potom zvyšnú hodnotu insertnuť do parenta
+			return node.parent.insert(separationValue)
 		}
 
 	}
 }
 
-func buildBTree() Node {
+func buildExampleBTree() Node {
 	// lowest level - left
 	lowest_l_l := Node{keys: []int{1}, children: []*Node{}}
 	lowest_l_r := Node{keys: []int{3}, children: []*Node{}}
