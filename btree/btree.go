@@ -37,12 +37,17 @@ func (node Node) hasFreeRoom() bool {
 	return len(node.keys) < K-1
 }
 
+func (parent Node) hasRoomForChildren() bool {
+	return len(parent.children) < K
+}
+
 func (node Node) hasValue(val int) bool {
 	return slices.Contains(node.keys, val)
 }
 
 func (node Node) determineChildIndex(val int) int {
 	for idx, key := range node.keys {
+		// TODO since i'm using slices now, maybe i dont need this -1 condition?
 		if key == -1 {
 			return idx // maybe return -1 in this case and thus end the search?
 		}
@@ -68,12 +73,17 @@ func (node *Node) createChildParentPointers() {
 	}
 }
 
-func (root *Node) insert(val int) *Node {
+func (root *Node) findAndInsert(val int) *Node {
+	node := findSuitableNodeForInsertion(root, val)
+	return node.insert(val, root)
+}
+
+func (node *Node) insert(val int, root *Node) *Node {
 	// TODO cleanup this method
 
 	// To insert a new element, search the tree to find the leaf node where the new element should be added.
+	// node := findSuitableNodeForInsertion(root, val)
 
-	node := findSuitableNodeForInsertion(root, val)
 	// If the node contains fewer than the maximum allowed number of elements, then there is room for the new element.
 	if node.hasFreeRoom() {
 		// Insert the new element in the node, keeping the node's elements ordered.
@@ -92,7 +102,8 @@ func (root *Node) insert(val int) *Node {
 		medianIndex := K / 2
 		temporaryKeySlice := node.keys
 
-		// Values less than the median are put in the new left node, and values greater than the median are put in the new right node, with the median acting as a separation value.
+		// Values less than the median are put in the new left node, and values greater than the median are put in the new right node,
+		//  with the median acting as a separation value.
 		// TODO rename node.keys to newLeftNode so that it's more obvious?
 		node.keys = temporaryKeySlice[:medianIndex] // The original node becomes the newLeftNode
 		newRightNode := Node{keys: temporaryKeySlice[medianIndex+1:], children: []*Node{}}
@@ -105,15 +116,14 @@ func (root *Node) insert(val int) *Node {
 			newRoot.createChildParentPointers()
 			return &newRoot
 		} else {
+			if node.parent.hasRoomForChildren() {
+				node.parent.children = append(node.parent.children, &newRightNode)
+			} else {
+				// TODO not sure what to do in this case and whether it can happen
+				return buildEmptyBTree()
+			}
 			// Else, the separation value is inserted in the node's parent which may cause it to be split, and so on.
-
-			// TODO tu treba zistiť, či parent má voľné miesto medzi children
-			// možno sa to rieši automagicky tým algoritmom samo...
-			// ale možno nie
-			// čiže pridať check na voľné miesto mezdi children
-			// a potom tie children nejak našróbovať na parenta
-			// a potom zvyšnú hodnotu insertnuť do parenta
-			return node.parent.insert(separationValue)
+			return node.parent.insert(separationValue, root)
 		}
 
 	}
