@@ -118,10 +118,8 @@ func (node *Node) insert(val int, root *Node) *Node {
 		} else {
 			if node.parent.hasRoomForChildren() {
 				node.parent.children = append(node.parent.children, &newRightNode)
-			} else {
-				// TODO not sure what to do in this case and whether it can happen
-				return buildEmptyBTree()
 			}
+			root.createChildParentPointers()
 			// Else, the separation value is inserted in the node's parent which may cause it to be split, and so on.
 			return node.parent.insert(separationValue, root)
 		}

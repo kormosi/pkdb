@@ -149,26 +149,53 @@ func TestInsertWithNodeSplitting(t *testing.T) {
 		t.Errorf("got %d, want %d", btree.children[1].keys, expectedRightChild)
 	}
 
-	// btree = btree.insert(5)
-	// expectedRoot = []int{2, 4}
+	btree = btree.findAndInsert(5)
+	expectedRoot = []int{2, 4}
+	expectedLeftChild = []int{1}
+	expectedCenterChild := []int{3}
+	expectedRightChild = []int{5}
+
+	if !reflect.DeepEqual(btree.keys, expectedRoot) {
+		t.Errorf("got %d, want %d", btree.keys, expectedRoot)
+	}
+	if !reflect.DeepEqual(btree.children[0].keys, expectedLeftChild) {
+		t.Errorf("got %d, want %d", btree.children[0].keys, expectedLeftChild)
+	}
+	if !reflect.DeepEqual(btree.children[1].keys, expectedCenterChild) {
+		t.Errorf("got %d, want %d", btree.children[1].keys, expectedCenterChild)
+	}
+	if !reflect.DeepEqual(btree.children[2].keys, expectedRightChild) {
+		t.Errorf("got %d, want %d", btree.children[2].keys, expectedRightChild)
+	}
+
+	btree = btree.findAndInsert(6)
+	expectedRoot = []int{2, 4}
+	expectedLeftChild = []int{1}
+	expectedCenterChild = []int{3}
+	expectedRightChild = []int{5, 6}
+
+	if !reflect.DeepEqual(btree.keys, expectedRoot) {
+		t.Errorf("got %d, want %d", btree.keys, expectedRoot)
+	}
+	if !reflect.DeepEqual(btree.children[0].keys, expectedLeftChild) {
+		t.Errorf("got %d, want %d", btree.children[0].keys, expectedLeftChild)
+	}
+	if !reflect.DeepEqual(btree.children[1].keys, expectedCenterChild) {
+		t.Errorf("got %d, want %d", btree.children[1].keys, expectedCenterChild)
+	}
+	if !reflect.DeepEqual(btree.children[2].keys, expectedRightChild) {
+		t.Errorf("got %d, want %d", btree.children[2].keys, expectedRightChild)
+	}
+
+	btree = btree.findAndInsert(7)
+	expectedRoot = []int{4}
 	// expectedLeftChild = []int{1}
-	// expectedCenterChild := []int{3}
-	// expectedRightChild = []int{5}
+	// expectedCenterChild = []int{3}
+	// expectedRightChild = []int{5, 6}
 
-	// if !reflect.DeepEqual(btree.keys, expectedRoot) {
-	// 	t.Errorf("got %d, want %d", btree.keys, expectedRoot)
-	// }
-
-	// TODO zajtra:
-	// Tieto 3 test casy potrebujem vyriešiť
-	// mať child 3 nody, každú s jednou hodnotou, by malo byť ľahké
-	// Potrebujem niekde do kódu pridať check, či už je naplnená kapacita children slicu
-	// Ak nie, tak na vhodné miesto pridať hodnotu
-
-	// Bude to len prípad splitovania nody - vložím do 3|4 päťku,
-
-	// čo nodu splitne a vznikne nová ľavá, čo bude vlastne pre parenta stredná
-
+	if !reflect.DeepEqual(btree.keys, expectedRoot) {
+		t.Errorf("got %d, want %d", btree.keys, expectedRoot)
+	}
 	// if !reflect.DeepEqual(btree.children[0].keys, expectedLeftChild) {
 	// 	t.Errorf("got %d, want %d", btree.children[0].keys, expectedLeftChild)
 	// }
@@ -178,5 +205,4 @@ func TestInsertWithNodeSplitting(t *testing.T) {
 	// if !reflect.DeepEqual(btree.children[2].keys, expectedRightChild) {
 	// 	t.Errorf("got %d, want %d", btree.children[2].keys, expectedRightChild)
 	// }
-
 }
