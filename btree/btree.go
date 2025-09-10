@@ -119,7 +119,8 @@ func (node *Node) insert(val int, root *Node) *Node {
 			if node.parent.hasRoomForChildren() {
 				node.parent.children = append(node.parent.children, &newRightNode)
 			}
-			root.createChildParentPointers()
+			// root.createChildParentPointers()
+			node.parent.createChildParentPointers()
 			// Else, the separation value is inserted in the node's parent which may cause it to be split, and so on.
 			return node.parent.insert(separationValue, root)
 		}
