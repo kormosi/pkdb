@@ -189,20 +189,38 @@ func TestInsertWithNodeSplitting(t *testing.T) {
 
 	btree = btree.findAndInsert(7)
 	expectedRoot = []int{4}
-	// expectedLeftChild = []int{1}
-	// expectedCenterChild = []int{3}
-	// expectedRightChild = []int{5, 6}
+
+	expectedLeftChild = []int{2}
+	expectedRightChild = []int{6}
+
+	expectedLeftChildOfTheLeftChild := []int{1}
+	expectedRightChildOfTheLeftChild := []int{3}
+
+	expectedLeftChildOfTheRightChild := []int{5}
+	expectedRightChildOfTheRightChild := []int{7}
 
 	if !reflect.DeepEqual(btree.keys, expectedRoot) {
 		t.Errorf("got %d, want %d", btree.keys, expectedRoot)
 	}
-	// if !reflect.DeepEqual(btree.children[0].keys, expectedLeftChild) {
-	// 	t.Errorf("got %d, want %d", btree.children[0].keys, expectedLeftChild)
-	// }
-	// if !reflect.DeepEqual(btree.children[1].keys, expectedCenterChild) {
-	// 	t.Errorf("got %d, want %d", btree.children[1].keys, expectedCenterChild)
-	// }
-	// if !reflect.DeepEqual(btree.children[2].keys, expectedRightChild) {
-	// 	t.Errorf("got %d, want %d", btree.children[2].keys, expectedRightChild)
-	// }
+
+	if !reflect.DeepEqual(btree.children[0].keys, expectedLeftChild) {
+		t.Errorf("got %d, want %d", btree.children[0].keys, expectedLeftChild)
+	}
+	if !reflect.DeepEqual(btree.children[1].keys, expectedRightChild) {
+		t.Errorf("got %d, want %d", btree.children[2].keys, expectedRightChild)
+	}
+
+	if !reflect.DeepEqual(btree.children[0].children[0].keys, expectedLeftChildOfTheLeftChild) {
+		t.Errorf("got %d, want %d", btree.children[0].children[0].keys, expectedLeftChildOfTheLeftChild)
+	}
+	if !reflect.DeepEqual(btree.children[0].children[1].keys, expectedRightChildOfTheLeftChild) {
+		t.Errorf("got %d, want %d", btree.children[0].children[1].keys, expectedRightChildOfTheLeftChild)
+	}
+
+	if !reflect.DeepEqual(btree.children[1].children[0].keys, expectedLeftChildOfTheRightChild) {
+		t.Errorf("got %d, want %d", btree.children[1].children[0].keys, expectedLeftChildOfTheRightChild)
+	}
+	if !reflect.DeepEqual(btree.children[1].children[1].keys, expectedRightChildOfTheRightChild) {
+		t.Errorf("got %d, want %d", btree.children[0].children[1].keys, expectedRightChildOfTheRightChild)
+	}
 }

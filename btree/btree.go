@@ -75,10 +75,15 @@ func (node *Node) createChildParentPointers() {
 
 func (root *Node) findAndInsert(val int) *Node {
 	node := findSuitableNodeForInsertion(root, val)
-	return node.insert(val, root)
+	children := make([]*Node, 0)
+	return node.insert(val, root, children)
 }
 
-func (node *Node) insert(val int, root *Node) *Node {
+// TODO maybe this shouldn't be a method of Node after all,
+// since we are passing root as param?
+// or should we just call this on root?
+// can we call this on the root all the time? don't think so
+func (node *Node) insert(val int, root *Node, children []*Node) *Node {
 	// TODO cleanup this method
 
 	// To insert a new element, search the tree to find the leaf node where the new element should be added.
@@ -109,6 +114,11 @@ func (node *Node) insert(val int, root *Node) *Node {
 		newRightNode := Node{keys: temporaryKeySlice[medianIndex+1:], children: []*Node{}}
 		separationValue := temporaryKeySlice[medianIndex]
 
+		if len(children) != 0 {
+			newRightNode.children = append(newRightNode.children, children[0])
+			newRightNode.children = append(newRightNode.children, children[1])
+		}
+
 		if node.parent == nil {
 			// If the node has no parent (i.e., the node was the root),
 			// create a new root above this node (increasing the height of the tree).
@@ -116,13 +126,18 @@ func (node *Node) insert(val int, root *Node) *Node {
 			newRoot.createChildParentPointers()
 			return &newRoot
 		} else {
+			// This if can probably be removed and let the `insert` take care of checking whether parent.hasRoomForChildren
 			if node.parent.hasRoomForChildren() {
+				// TUTO potom možno dvakrát toto volanie, resp. nejak tam našróbovať aj newleftnode
 				node.parent.children = append(node.parent.children, &newRightNode)
 			}
 			// root.createChildParentPointers()
 			node.parent.createChildParentPointers()
 			// Else, the separation value is inserted in the node's parent which may cause it to be split, and so on.
-			return node.parent.insert(separationValue, root)
+			children := make([]*Node, 2)
+			children[0] = node
+			children[1] = &newRightNode
+			return node.parent.insert(separationValue, root, children)
 		}
 
 	}
