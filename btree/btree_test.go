@@ -80,7 +80,7 @@ func TestFindSuitableNodeForInsertion(t *testing.T) {
 	// Could be made better by creating trees of different levels here as params
 	btree := buildExampleBTree()
 	expected := []int{7}
-	nodeFound := findSuitableNodeForInsertion(&btree, 8)
+	nodeFound := findNodeSuitableForInsertion(&btree, 8)
 	if !reflect.DeepEqual(nodeFound.keys, expected) {
 		t.Errorf("got %d, want %d", nodeFound.keys, expected)
 	}

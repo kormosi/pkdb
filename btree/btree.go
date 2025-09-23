@@ -74,7 +74,7 @@ func (node *Node) createChildParentPointers() {
 }
 
 func (root *Node) findAndInsert(val int) *Node {
-	node := findSuitableNodeForInsertion(root, val)
+	node := findNodeSuitableForInsertion(root, val)
 	children := make([]*Node, 0)
 	return node.insert(val, root, children)
 }
@@ -201,10 +201,10 @@ func isInBTree(node Node, val int) bool {
 // Should we concern ourselves with such a possiblity?
 // Maybe it won't happen when used in DB, because of hashing
 // Then again, collisions can happen, so maybe it should be handled
-func findSuitableNodeForInsertion(node *Node, val int) *Node {
+func findNodeSuitableForInsertion(node *Node, val int) *Node {
 	if node.hasChildren() {
 		childToSearchIndex := node.determineChildIndex(val)
-		return findSuitableNodeForInsertion(node.children[childToSearchIndex], val)
+		return findNodeSuitableForInsertion(node.children[childToSearchIndex], val)
 	} else {
 		return node
 	}
