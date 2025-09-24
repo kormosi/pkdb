@@ -99,7 +99,7 @@ func TestInsertWithoutNodeSplitting(t *testing.T) {
 }
 
 func TestInsertWithNodeSplitting(t *testing.T) {
-	// TODO test-case pre každý frame obrázku tohto obrázku:
+	// This is a test-case for each frame of this picture:
 	// https://upload.wikimedia.org/wikipedia/commons/3/33/B_tree_insertion_example.png
 
 	// akonáhle spravím test pre každú úroveň z toho obrázku
