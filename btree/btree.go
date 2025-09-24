@@ -114,9 +114,28 @@ func (node *Node) insert(val int, root *Node, children []*Node) *Node {
 		newRightNode := Node{keys: temporaryKeySlice[medianIndex+1:], children: []*Node{}}
 		separationValue := temporaryKeySlice[medianIndex]
 
-		if len(children) != 0 {
-			newRightNode.children = append(newRightNode.children, children[0])
-			newRightNode.children = append(newRightNode.children, children[1])
+		// TODO v tomto kroku má pôvodná noda (4/8) pod sebou tieto deti:
+		// (1), (7), (10)
+		// ja pod novú left nodu, ktorá bude (2), potrebujem dať všetky tie,
+		// ktoré sú menšie ako separačná hodnota 4.
+		// čiže z premennej `children` (ktorá má (1) a (3))
+		// to tam potrebujem dať.. for idx in children.. newleftnode[idx] == children[idx]
+
+		if len(children) > 0 {
+			for i, v := range children {
+				// TODO should we only ever access the 0th index in v.keys?
+				if v.keys[0] < separationValue {
+					node.children = append(node.children, children[i])
+				} else if v.keys[0] > separationValue {
+					newRightNode.children = append(node.children, children[i])
+				} else {
+					panic("v.keys[0] < separationValue")
+				}
+			}
+			node.children = children
+			// node.children = append(node.children, children...)
+			// newRightNode.children = append(newRightNode.children, children[0])
+			// newRightNode.children = append(newRightNode.children, children[1])
 		}
 
 		if node.parent == nil {
@@ -134,6 +153,7 @@ func (node *Node) insert(val int, root *Node, children []*Node) *Node {
 			// root.createChildParentPointers()
 			node.parent.createChildParentPointers()
 			// Else, the separation value is inserted in the node's parent which may cause it to be split, and so on.
+			// TODO inline these 3 statements
 			children := make([]*Node, 2)
 			children[0] = node
 			children[1] = &newRightNode
