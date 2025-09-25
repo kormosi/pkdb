@@ -120,6 +120,14 @@ func (node *Node) insert(val int, root *Node, children []*Node) *Node {
 		// ktoré sú menšie ako separačná hodnota 4.
 		// čiže z premennej `children` (ktorá má (1) a (3))
 		// to tam potrebujem dať.. for idx in children.. newleftnode[idx] == children[idx]
+		if len(node.children) > 0 {
+			for i, v := range node.children {
+				// TODO should we only ever access the 0th index in v.keys?
+				if v.keys[0] > separationValue {
+					newRightNode.children = append(newRightNode.children, node.children[i])
+				}
+			}
+		}
 
 		if len(children) > 0 {
 			for i, v := range children {
