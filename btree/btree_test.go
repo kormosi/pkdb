@@ -340,4 +340,40 @@ func TestInsertRandomValues(t *testing.T) {
 		t.Errorf("got %d, want %d", btree.children[0].children[1].keys, expectedRightChildOfTheRightChild)
 	}
 
+btree = btree.findAndInsert(11)
+
+	expectedRoot = []int{4}
+
+	expectedLeftChild = []int{2}
+	expectedRightChild = []int{8}
+
+	expectedLeftChildOfTheLeftChild = []int{1}
+	expectedRightChildOfTheLeftChild = []int{3}
+
+	expectedLeftChildOfTheRightChild = []int{7}
+	expectedRightChildOfTheRightChild = []int{10, 11}
+
+	if !reflect.DeepEqual(btree.keys, expectedRoot) {
+		t.Errorf("got %d, want %d", btree.keys, expectedRoot)
+	}
+	if !reflect.DeepEqual(btree.children[0].keys, expectedLeftChild) {
+		t.Errorf("got %d, want %d", btree.children[0].keys, expectedLeftChild)
+	}
+	if !reflect.DeepEqual(btree.children[1].keys, expectedRightChild) {
+		t.Errorf("got %d, want %d", btree.children[1].keys, expectedRightChild)
+	}
+
+	if !reflect.DeepEqual(btree.children[0].children[0].keys, expectedLeftChildOfTheLeftChild) {
+		t.Errorf("got %d, want %d", btree.children[0].children[0].keys, expectedLeftChildOfTheLeftChild)
+	}
+	if !reflect.DeepEqual(btree.children[0].children[1].keys, expectedRightChildOfTheLeftChild) {
+		t.Errorf("got %d, want %d", btree.children[0].children[1].keys, expectedRightChildOfTheLeftChild)
+	}
+
+	if !reflect.DeepEqual(btree.children[1].children[0].keys, expectedLeftChildOfTheRightChild) {
+		t.Errorf("got %d, want %d", btree.children[1].children[0].keys, expectedLeftChildOfTheRightChild)
+	}
+	if !reflect.DeepEqual(btree.children[1].children[1].keys, expectedRightChildOfTheRightChild) {
+		t.Errorf("got %d, want %d", btree.children[0].children[1].keys, expectedRightChildOfTheRightChild)
+	}
 }

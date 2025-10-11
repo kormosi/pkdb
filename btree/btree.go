@@ -73,6 +73,24 @@ func (node *Node) createChildParentPointers() {
 	}
 }
 
+func (node *Node) insertChildAnyway(newRightNode *Node) {
+	var inserted = false
+
+	for i, c := range node.parent.children {
+		if c.keys[0] > newRightNode.keys[0] {
+			// TODO do we need to store the result of this op? probably not
+			node.parent.children = slices.Insert(node.parent.children, i, newRightNode)
+			inserted = true
+			break
+		}
+
+		if inserted {
+			return
+		}
+		node.parent.children = append(node.parent.children, newRightNode)
+	}
+}
+
 func (root *Node) findAndInsert(val int) *Node {
 	node := findNodeSuitableForInsertion(root, val)
 	children := make([]*Node, 0)
@@ -153,19 +171,21 @@ func (node *Node) insert(val int, root *Node, children []*Node) *Node {
 			newRoot.createChildParentPointers()
 			return &newRoot
 		} else {
-			// This if can probably be removed and let the `insert` take care of checking whether parent.hasRoomForChildren
+			// This "if" can probably be removed and let the `insert` take care of checking whether parent.hasRoomForChildren
 			if node.parent.hasRoomForChildren() {
 				// TUTO potom možno dvakrát toto volanie, resp. nejak tam našróbovať aj newleftnode
 				node.parent.children = append(node.parent.children, &newRightNode)
+				node.parent.createChildParentPointers()
+			} else {
+				// TODO unsure as to why we index into keys[0] here -> investigate
+				node.insertChildAnyway(&newRightNode)
+				node.parent.createChildParentPointers()
 			}
+			return node.parent.insert(separationValue, root, children)
+
 			// root.createChildParentPointers()
-			node.parent.createChildParentPointers()
 			// Else, the separation value is inserted in the node's parent which may cause it to be split, and so on.
 			// TODO inline these 3 statements
-			children := make([]*Node, 2)
-			children[0] = node
-			children[1] = &newRightNode
-			return node.parent.insert(separationValue, root, children)
 		}
 
 	}
