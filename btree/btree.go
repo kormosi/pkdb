@@ -33,29 +33,24 @@ type Node struct {
 	// leaf bool	 // possibly needed in future?
 }
 
-func (node Node) hasFreeRoom() bool {
-	return len(node.keys) < K-1
+// TODO tuto pokračovať, spraviť z toho clean-code novinový kód
+func (root *Node) Insert(val int) *Node {
+	// To insert a new element, search the tree to find the leaf node where the new element should be added.
+	node := findNodeSuitableForInsertion(root, val)
+	return node.insert(val, root)
 }
 
-func (parent Node) hasRoomForChildren() bool {
-	return len(parent.children) < K
-}
-
-func (node Node) hasValue(val int) bool {
-	return slices.Contains(node.keys, val)
-}
-
-func (node Node) determineChildIndex(val int) int {
-	for idx, key := range node.keys {
-		// TODO since i'm using slices now, maybe i dont need this -1 condition?
-		if key == -1 {
-			return idx // maybe return -1 in this case and thus end the search?
-		}
-		if val < key {
-			return idx
-		}
+// TODO what if value already is in the Btree?
+// Should we concern ourselves with such a possiblity?
+// Maybe it won't happen when used in DB, because of hashing.
+// Then again, collisions can happen, so maybe it should be handled.
+func findNodeSuitableForInsertion(node *Node, val int) *Node {
+	if node.hasChildren() {
+		childToSearchIndex := node.determineChildIndex(val)
+		return findNodeSuitableForInsertion(node.children[childToSearchIndex], val)
+	} else {
+		return node
 	}
-	return len(node.keys)
 }
 
 func (node Node) hasChildren() bool {
@@ -65,6 +60,28 @@ func (node Node) hasChildren() bool {
 		}
 	}
 	return false
+}
+
+func (node Node) determineChildIndex(val int) int {
+	for idx, key := range node.keys {
+		if val < key {
+			return idx
+		}
+	}
+	return len(node.keys)
+}
+
+// TODO unit test for every such function
+func (node Node) hasFreeRoom() bool {
+	return len(node.keys) < K-1
+}
+
+func (node Node) hasRoomForChildren() bool {
+	return len(node.children) < K
+}
+
+func (node Node) containsValue(val int) bool {
+	return slices.Contains(node.keys, val)
 }
 
 func (node *Node) createChildParentPointers() {
@@ -91,77 +108,52 @@ func (node *Node) insertChildAnyway(newRightNode *Node) {
 	}
 }
 
-func (root *Node) findAndInsert(val int) *Node {
-	node := findNodeSuitableForInsertion(root, val)
-	children := make([]*Node, 0)
-	return node.insert(val, root, children)
+func appendAndSort(slice []int, val int) []int {
+	newKeys := append(slice, val)
+	slices.Sort(newKeys)
+	return newKeys
 }
 
-// TODO maybe this shouldn't be a method of Node after all,
-// since we are passing root as param?
-// or should we just call this on root?
-// can we call this on the root all the time? don't think so
-func (node *Node) insert(val int, root *Node, children []*Node) *Node {
-	// TODO cleanup this method
-
-	// To insert a new element, search the tree to find the leaf node where the new element should be added.
-	// node := findSuitableNodeForInsertion(root, val)
-
+// TODO: instead of taking root as argument here,
+// create a method node.absoluteRoot and return from that?
+func (node *Node) insert(val int, root *Node) *Node {
 	// If the node contains fewer than the maximum allowed number of elements, then there is room for the new element.
 	if node.hasFreeRoom() {
 		// Insert the new element in the node, keeping the node's elements ordered.
-		node.keys = append(node.keys, val)
-		slices.Sort(node.keys)
+		node.keys = appendAndSort(node.keys, val)
 		return root
 	} else {
 		// Otherwise the node is full, evenly split it into two nodes so:
-		// A single median is chosen from among the leaf's elements and the new element that is being inserted.
-		// Patrik's notes: choosing a single median will be easy if there's 2 keys + 1 new key (3 total, so just choose index 1, that is, the second element)
-		// This won't work for non-odd K values, but I guess it's good for now.
+		// A single median is chosen from among the leaf's elements
+		// and the new element that is being inserted.
+		temporaryKeySlice := appendAndSort(node.keys, val)
+		medianIndex := K / 2 // What if K is an even number? How to choose median index then?
 
-		// Choose the median
-		node.keys = append(node.keys, val) // opportunity for refactor,
-		slices.Sort(node.keys)             // in the above `if` we do the same
-		medianIndex := K / 2
-		temporaryKeySlice := node.keys
-
-		// Values less than the median are put in the new left node, and values greater than the median are put in the new right node,
-		//  with the median acting as a separation value.
-		// TODO rename node.keys to newLeftNode so that it's more obvious?
-		node.keys = temporaryKeySlice[:medianIndex] // The original node becomes the newLeftNode
+		// Values less than the median are put in the new left node,
+		// and values greater than the median are put in the new right node,
+		// with the median acting as a separation value.
+		node.keys = temporaryKeySlice[:medianIndex] // The original node becomes the new left node
 		newRightNode := Node{keys: temporaryKeySlice[medianIndex+1:], children: []*Node{}}
 		separationValue := temporaryKeySlice[medianIndex]
 
-		// TODO v tomto kroku má pôvodná noda (4/8) pod sebou tieto deti:
-		// (1), (7), (10)
-		// ja pod novú left nodu, ktorá bude (2), potrebujem dať všetky tie,
-		// ktoré sú menšie ako separačná hodnota 4.
-		// čiže z premennej `children` (ktorá má (1) a (3))
-		// to tam potrebujem dať.. for idx in children.. newleftnode[idx] == children[idx]
+		indexesToRemove := []int{}
+
 		if len(node.children) > 0 {
+			// TODO  tu pokračovať: ked spustim TestInsertWithNodeSplitting tak noda[2] tu má 3x [7] medzi children.. vyriešiť
 			for i, v := range node.children {
 				// TODO should we only ever access the 0th index in v.keys?
 				if v.keys[0] > separationValue {
 					newRightNode.children = append(newRightNode.children, node.children[i])
+					indexesToRemove = append(indexesToRemove, i)
 				}
 			}
 		}
 
-		if len(children) > 0 {
-			for i, v := range children {
-				// TODO should we only ever access the 0th index in v.keys?
-				if v.keys[0] < separationValue {
-					node.children = append(node.children, children[i])
-				} else if v.keys[0] > separationValue {
-					newRightNode.children = append(node.children, children[i])
-				} else {
-					panic("v.keys[0] < separationValue")
-				}
-			}
-			node.children = children
-			// node.children = append(node.children, children...)
-			// newRightNode.children = append(newRightNode.children, children[0])
-			// newRightNode.children = append(newRightNode.children, children[1])
+		// Remove the redundant node children
+		indexModifier := 0
+		for _, idx := range indexesToRemove {
+			node.children = append(node.children[:idx+indexModifier], node.children[idx+1+indexModifier:]...)
+			indexModifier-- // Without this we would get `slice bounds out of range` error in this loop
 		}
 
 		if node.parent == nil {
@@ -181,7 +173,7 @@ func (node *Node) insert(val int, root *Node, children []*Node) *Node {
 				node.insertChildAnyway(&newRightNode)
 				node.parent.createChildParentPointers()
 			}
-			return node.parent.insert(separationValue, root, children)
+			return node.parent.insert(separationValue, root)
 
 			// root.createChildParentPointers()
 			// Else, the separation value is inserted in the node's parent which may cause it to be split, and so on.
@@ -234,7 +226,7 @@ func printBTree(root Node) {
 
 // TODO maybe this function can be deprecated?
 func isInBTree(node Node, val int) bool {
-	if node.hasValue(val) {
+	if node.containsValue(val) {
 		return true
 	} else {
 		if node.hasChildren() {
@@ -243,19 +235,6 @@ func isInBTree(node Node, val int) bool {
 		}
 	}
 	return false
-}
-
-// TODO what if value already is in the Btree?
-// Should we concern ourselves with such a possiblity?
-// Maybe it won't happen when used in DB, because of hashing
-// Then again, collisions can happen, so maybe it should be handled
-func findNodeSuitableForInsertion(node *Node, val int) *Node {
-	if node.hasChildren() {
-		childToSearchIndex := node.determineChildIndex(val)
-		return findNodeSuitableForInsertion(node.children[childToSearchIndex], val)
-	} else {
-		return node
-	}
 }
 
 func printSlice(s []int) {

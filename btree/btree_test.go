@@ -86,18 +86,6 @@ func TestFindSuitableNodeForInsertion(t *testing.T) {
 	}
 }
 
-func TestInsertWithoutNodeSplitting(t *testing.T) {
-	emptyBtree := buildEmptyBTree()
-	expected := []int{1, 2}
-
-	emptyBtree.findAndInsert(2)
-	emptyBtree.findAndInsert(1)
-
-	if !reflect.DeepEqual(emptyBtree.keys, expected) {
-		t.Errorf("got %d, want %d", emptyBtree.keys, expected)
-	}
-}
-
 func TestInsertWithNodeSplitting(t *testing.T) {
 	// This is a test-case for each frame of this picture:
 	// https://upload.wikimedia.org/wikipedia/commons/3/33/B_tree_insertion_example.png
@@ -108,20 +96,20 @@ func TestInsertWithNodeSplitting(t *testing.T) {
 	// je to taký chicken-egg problém, lebo insert samotný používa TestFindSuitableNodeForInsertion
 
 	btree := buildEmptyBTree()
-	btree = btree.findAndInsert(1)
+	btree = btree.Insert(1)
 	expectedKeys := []int{1}
 	if !reflect.DeepEqual(btree.keys, expectedKeys) {
 		t.Errorf("got %d, want %d", btree.keys, expectedKeys)
 	}
 
-	btree = btree.findAndInsert(2)
+	btree = btree.Insert(2)
 	expectedKeys = []int{1, 2}
 	if !reflect.DeepEqual(btree.keys, expectedKeys) {
 		t.Errorf("got %d, want %d", btree.keys, expectedKeys)
 	}
 
 	// This should trigger the splitting of the node
-	btree = btree.findAndInsert(3)
+	btree = btree.Insert(3)
 	expectedRoot := []int{2}
 	expectedLeftChild := []int{1}
 	expectedRightChild := []int{3}
@@ -135,7 +123,7 @@ func TestInsertWithNodeSplitting(t *testing.T) {
 		t.Errorf("got %d, want %d", btree.children[1].keys, expectedRightChild)
 	}
 
-	btree = btree.findAndInsert(4)
+	btree = btree.Insert(4)
 	expectedRoot = []int{2}
 	expectedLeftChild = []int{1}
 	expectedRightChild = []int{3, 4}
@@ -149,7 +137,7 @@ func TestInsertWithNodeSplitting(t *testing.T) {
 		t.Errorf("got %d, want %d", btree.children[1].keys, expectedRightChild)
 	}
 
-	btree = btree.findAndInsert(5)
+	btree = btree.Insert(5)
 	expectedRoot = []int{2, 4}
 	expectedLeftChild = []int{1}
 	expectedCenterChild := []int{3}
@@ -168,7 +156,7 @@ func TestInsertWithNodeSplitting(t *testing.T) {
 		t.Errorf("got %d, want %d", btree.children[2].keys, expectedRightChild)
 	}
 
-	btree = btree.findAndInsert(6)
+	btree = btree.Insert(6)
 	expectedRoot = []int{2, 4}
 	expectedLeftChild = []int{1}
 	expectedCenterChild = []int{3}
@@ -187,7 +175,7 @@ func TestInsertWithNodeSplitting(t *testing.T) {
 		t.Errorf("got %d, want %d", btree.children[2].keys, expectedRightChild)
 	}
 
-	btree = btree.findAndInsert(7)
+	btree = btree.Insert(7)
 	expectedRoot = []int{4}
 
 	expectedLeftChild = []int{2}
@@ -228,19 +216,19 @@ func TestInsertWithNodeSplitting(t *testing.T) {
 func TestInsertRandomValues(t *testing.T) {
 
 	btree := buildEmptyBTree()
-	btree = btree.findAndInsert(4)
+	btree = btree.Insert(4)
 	expectedKeys := []int{4}
 	if !reflect.DeepEqual(btree.keys, expectedKeys) {
 		t.Errorf("got %d, want %d", btree.keys, expectedKeys)
 	}
 
-	btree = btree.findAndInsert(7)
+	btree = btree.Insert(7)
 	expectedKeys = []int{4, 7}
 	if !reflect.DeepEqual(btree.keys, expectedKeys) {
 		t.Errorf("got %d, want %d", btree.keys, expectedKeys)
 	}
 
-	btree = btree.findAndInsert(1)
+	btree = btree.Insert(1)
 	expectedRoot := []int{4}
 	expectedLeftChild := []int{1}
 	expectedRightChild := []int{7}
@@ -254,7 +242,7 @@ func TestInsertRandomValues(t *testing.T) {
 		t.Errorf("got %d, want %d", btree.children[1].keys, expectedRightChild)
 	}
 
-	btree = btree.findAndInsert(10)
+	btree = btree.Insert(10)
 	expectedRoot = []int{4}
 	expectedLeftChild = []int{1}
 	expectedRightChild = []int{7, 10}
@@ -269,7 +257,7 @@ func TestInsertRandomValues(t *testing.T) {
 		t.Errorf("got %d, want %d", btree.children[1].keys, expectedRightChild)
 	}
 
-	btree = btree.findAndInsert(2)
+	btree = btree.Insert(2)
 	expectedRoot = []int{4}
 	expectedLeftChild = []int{1, 2}
 	expectedRightChild = []int{7, 10}
@@ -284,7 +272,7 @@ func TestInsertRandomValues(t *testing.T) {
 		t.Errorf("got %d, want %d", btree.children[1].keys, expectedRightChild)
 	}
 
-	btree = btree.findAndInsert(8)
+	btree = btree.Insert(8)
 	expectedRoot = []int{4, 8}
 	expectedLeftChild = []int{1, 2}
 	expectedCenterChild := []int{7}
@@ -303,7 +291,7 @@ func TestInsertRandomValues(t *testing.T) {
 		t.Errorf("got %d, want %d", btree.children[2].keys, expectedRightChild)
 	}
 
-	btree = btree.findAndInsert(3)
+	btree = btree.Insert(3)
 
 	expectedRoot = []int{4}
 
@@ -340,7 +328,7 @@ func TestInsertRandomValues(t *testing.T) {
 		t.Errorf("got %d, want %d", btree.children[0].children[1].keys, expectedRightChildOfTheRightChild)
 	}
 
-btree = btree.findAndInsert(11)
+	btree = btree.Insert(11)
 
 	expectedRoot = []int{4}
 
