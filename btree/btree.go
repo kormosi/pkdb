@@ -91,21 +91,14 @@ func (node *Node) createChildParentPointers() {
 }
 
 func (node *Node) insertChildAnyway(newRightNode *Node) {
-	var inserted = false
 
 	for i, c := range node.parent.children {
 		if c.keys[0] > newRightNode.keys[0] {
-			// TODO do we need to store the result of this op? probably not
 			node.parent.children = slices.Insert(node.parent.children, i, newRightNode)
-			inserted = true
-			break
-		}
-
-		if inserted {
 			return
 		}
-		node.parent.children = append(node.parent.children, newRightNode)
 	}
+	node.parent.children = append(node.parent.children, newRightNode)
 }
 
 func appendAndSort(slice []int, val int) []int {
@@ -139,7 +132,6 @@ func (node *Node) insert(val int, root *Node) *Node {
 		indexesToRemove := []int{}
 
 		if len(node.children) > 0 {
-			// TODO  tu pokračovať: ked spustim TestInsertWithNodeSplitting tak noda[2] tu má 3x [7] medzi children.. vyriešiť
 			for i, v := range node.children {
 				// TODO should we only ever access the 0th index in v.keys?
 				if v.keys[0] > separationValue {
