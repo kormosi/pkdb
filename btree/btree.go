@@ -25,7 +25,6 @@ import (
 // Keep this constant odd (see the `insert` function)
 const K = 3 // Maximum number of potential search keys for each node in a B-tree
 
-// TODO do samostatného súboru to dať
 type Node struct {
 	keys     []int // length of this cannot exceed K; (it's called keys, but it's also values for now)
 	children []*Node
@@ -37,7 +36,7 @@ type Node struct {
 func (root *Node) Insert(val int) *Node {
 	// To insert a new element, search the tree to find the leaf node where the new element should be added.
 	node := findNodeSuitableForInsertion(root, val)
-	return node.insert(val, root)
+	return node.insert(val)
 }
 
 // TODO what if value already is in the Btree?
@@ -53,68 +52,10 @@ func findNodeSuitableForInsertion(node *Node, val int) *Node {
 	}
 }
 
-func (node Node) hasChildren() bool {
-	for _, child := range node.children {
-		if child != nil {
-			return true
-		}
-	}
-	return false
-}
-
-func (node Node) determineChildIndex(val int) int {
-	for idx, key := range node.keys {
-		if val < key {
-			return idx
-		}
-	}
-	return len(node.keys)
-}
-
-// TODO unit test for every such function
-func (node Node) hasFreeRoom() bool {
-	return len(node.keys) < K-1
-}
-
-func (node Node) hasRoomForChildren() bool {
-	return len(node.children) < K
-}
-
-func (node Node) containsValue(val int) bool {
-	return slices.Contains(node.keys, val)
-}
-
-func (node *Node) createChildParentPointers() {
-	for _, child := range node.children {
-		child.parent = node
-	}
-}
-
-func (node *Node) insertChildAnyway(newRightNode *Node) {
-
-	for i, c := range node.parent.children {
-		if c.keys[0] > newRightNode.keys[0] {
-			node.parent.children = slices.Insert(node.parent.children, i, newRightNode)
-			return
-		}
-	}
-	node.parent.children = append(node.parent.children, newRightNode)
-}
-
-func appendAndSort(slice []int, val int) []int {
-	newKeys := append(slice, val)
-	slices.Sort(newKeys)
-	return newKeys
-}
-
-// TODO: instead of taking root as argument here,
-// create a method node.absoluteRoot and return from that?
-func (node *Node) insert(val int, root *Node) *Node {
-	// If the node contains fewer than the maximum allowed number of elements, then there is room for the new element.
+func (node *Node) insert(val int) *Node {
 	if node.hasFreeRoom() {
-		// Insert the new element in the node, keeping the node's elements ordered.
 		node.keys = appendAndSort(node.keys, val)
-		return root
+		return node.absoluteRoot()
 	} else {
 		// Otherwise the node is full, evenly split it into two nodes so:
 		// A single median is chosen from among the leaf's elements
@@ -155,24 +96,90 @@ func (node *Node) insert(val int, root *Node) *Node {
 			newRoot.createChildParentPointers()
 			return &newRoot
 		} else {
-			// This "if" can probably be removed and let the `insert` take care of checking whether parent.hasRoomForChildren
 			if node.parent.hasRoomForChildren() {
-				// TUTO potom možno dvakrát toto volanie, resp. nejak tam našróbovať aj newleftnode
 				node.parent.children = append(node.parent.children, &newRightNode)
-				node.parent.createChildParentPointers()
 			} else {
-				// TODO unsure as to why we index into keys[0] here -> investigate
-				node.insertChildAnyway(&newRightNode)
-				node.parent.createChildParentPointers()
+				node.insertChild(&newRightNode)
 			}
-			return node.parent.insert(separationValue, root)
-
-			// root.createChildParentPointers()
-			// Else, the separation value is inserted in the node's parent which may cause it to be split, and so on.
-			// TODO inline these 3 statements
+				node.parent.createChildParentPointers()
+			return node.parent.insert(separationValue)
 		}
-
 	}
+}
+
+// TODO unit test for every such function
+func (node Node) hasFreeRoom() bool {
+	return len(node.keys) < K-1
+}
+
+func appendAndSort(slice []int, val int) []int {
+	newKeys := append(slice, val)
+	slices.Sort(newKeys)
+	return newKeys
+}
+
+func (node *Node) absoluteRoot() *Node {
+	if node.parent == nil {
+		return node
+	}
+	return node.parent.absoluteRoot()
+}
+
+func splitNode(node *Node, val int) (*Node, *Node) {
+	temporaryKeySlice := appendAndSort(node.keys, val)
+	medianIndex := K / 2 // What if K is an even number? How to choose median index then?
+
+	// Values less than the median are put in the new left node,
+	// and values greater than the median are put in the new right node,
+	// with the median acting as a separation value.
+	node.keys = temporaryKeySlice[:medianIndex] // The original node becomes the new left node
+	newRightNode := Node{keys: temporaryKeySlice[medianIndex+1:], children: []*Node{}}
+
+	return node, &newRightNode
+
+}
+
+func (node Node) hasChildren() bool {
+	for _, child := range node.children {
+		if child != nil {
+			return true
+		}
+	}
+	return false
+}
+
+func (node Node) determineChildIndex(val int) int {
+	for idx, key := range node.keys {
+		if val < key {
+			return idx
+		}
+	}
+	return len(node.keys)
+}
+
+func (node Node) hasRoomForChildren() bool {
+	return len(node.children) < K
+}
+
+func (node Node) containsValue(val int) bool {
+	return slices.Contains(node.keys, val)
+}
+
+func (node *Node) createChildParentPointers() {
+	for _, child := range node.children {
+		child.parent = node
+	}
+}
+
+func (node *Node) insertChild(nodeToInsert *Node) {
+	// TODO unsure as to why we index into keys[0] here -> investigate
+	for idx, child := range node.parent.children {
+		if child.keys[0] > nodeToInsert.keys[0] {
+			node.parent.children = slices.Insert(node.parent.children, idx, nodeToInsert)
+			return
+		}
+	}
+	node.parent.children = append(node.parent.children, nodeToInsert)
 }
 
 func buildExampleBTree() Node {
