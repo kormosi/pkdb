@@ -65,7 +65,7 @@ func (node *Node) insert(val int) *Node {
 			for i, v := range newLeftNode.children {
 				// TODO should we only ever access the 0th index in v.keys?
 				if v.keys[0] > separationValue {
-					newRightNode.children = append(newRightNode.children, node.children[i])
+					newRightNode.children = append(newRightNode.children, newLeftNode.children[i])
 					indexesToRemove = append(indexesToRemove, i)
 				}
 			}
@@ -74,14 +74,14 @@ func (node *Node) insert(val int) *Node {
 		// Remove the redundant node children
 		indexModifier := 0
 		for _, idx := range indexesToRemove {
-			node.children = append(node.children[:idx+indexModifier], node.children[idx+1+indexModifier:]...)
+			newLeftNode.children = append(newLeftNode.children[:idx+indexModifier], newLeftNode.children[idx+1+indexModifier:]...)
 			indexModifier-- // Without this we would get `slice bounds out of range` error in this loop
 		}
 
 		if node.parent == nil {
 			// If the node has no parent (i.e., the node was the root),
 			// create a new root above this node (increasing the height of the tree).
-			newRoot := Node{keys: []int{separationValue}, children: []*Node{node, newRightNode}}
+			newRoot := Node{keys: []int{separationValue}, children: []*Node{newLeftNode, newRightNode}}
 			newRoot.createChildParentPointers()
 			return &newRoot
 		} else {
@@ -90,7 +90,7 @@ func (node *Node) insert(val int) *Node {
 			} else {
 				node.insertChild(newRightNode)
 			}
-			node.parent.createChildParentPointers()
+			newLeftNode.parent.createChildParentPointers() // TODO no need to do this for the newRightNode?
 			return node.parent.insert(separationValue)
 		}
 	}
