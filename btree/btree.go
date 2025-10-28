@@ -57,14 +57,6 @@ func (node *Node) insert(val int) *Node {
 		node.keys = appendAndSort(node.keys, val)
 		return node.absoluteRoot()
 	} else {
-		// Otherwise the node is full, evenly split it into two nodes so:
-		// A single median is chosen from among the leaf's elements
-		// and the new element that is being inserted.
-
-		// Values less than the median are put in the new left node,
-		// and values greater than the median are put in the new right node,
-		// with the median acting as a separation value.
-
 		newLeftNode, newRightNode, separationValue := splitNode(node, val)
 
 		indexesToRemove := []int{}
@@ -98,7 +90,7 @@ func (node *Node) insert(val int) *Node {
 			} else {
 				node.insertChild(newRightNode)
 			}
-				node.parent.createChildParentPointers()
+			node.parent.createChildParentPointers()
 			return node.parent.insert(separationValue)
 		}
 	}
@@ -123,17 +115,11 @@ func (node *Node) absoluteRoot() *Node {
 }
 
 func splitNode(node *Node, val int) (*Node, *Node, int) {
-	temporaryKeySlice := appendAndSort(node.keys, val)
-	medianIndex := K / 2 // What if K is an even number? How to choose median index then?
-
-	// Values less than the median are put in the new left node,
-	// and values greater than the median are put in the new right node,
-	// with the median acting as a separation value.
-	node.keys = temporaryKeySlice[:medianIndex] // The original node becomes the new left node
-	newRightNode := Node{keys: temporaryKeySlice[medianIndex+1:], children: []*Node{}}
-
-	separationValue := temporaryKeySlice[medianIndex]
-
+	allKeys := appendAndSort(node.keys, val)
+	medianIndex := K / 2 // TODO: What if K is an even number? How to choose median index then?
+	separationValue := allKeys[medianIndex]
+	node.keys = allKeys[:medianIndex] // The original node becomes the new left node
+	newRightNode := Node{keys: allKeys[medianIndex+1:], children: []*Node{}}
 	return node, &newRightNode, separationValue
 }
 
