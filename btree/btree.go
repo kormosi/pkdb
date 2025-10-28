@@ -60,20 +60,17 @@ func (node *Node) insert(val int) *Node {
 		// Otherwise the node is full, evenly split it into two nodes so:
 		// A single median is chosen from among the leaf's elements
 		// and the new element that is being inserted.
-		temporaryKeySlice := appendAndSort(node.keys, val)
-		medianIndex := K / 2 // What if K is an even number? How to choose median index then?
 
 		// Values less than the median are put in the new left node,
 		// and values greater than the median are put in the new right node,
 		// with the median acting as a separation value.
-		node.keys = temporaryKeySlice[:medianIndex] // The original node becomes the new left node
-		newRightNode := Node{keys: temporaryKeySlice[medianIndex+1:], children: []*Node{}}
-		separationValue := temporaryKeySlice[medianIndex]
+
+		newLeftNode, newRightNode, separationValue := splitNode(node, val)
 
 		indexesToRemove := []int{}
 
-		if len(node.children) > 0 {
-			for i, v := range node.children {
+		if len(newLeftNode.children) > 0 {
+			for i, v := range newLeftNode.children {
 				// TODO should we only ever access the 0th index in v.keys?
 				if v.keys[0] > separationValue {
 					newRightNode.children = append(newRightNode.children, node.children[i])
@@ -92,14 +89,14 @@ func (node *Node) insert(val int) *Node {
 		if node.parent == nil {
 			// If the node has no parent (i.e., the node was the root),
 			// create a new root above this node (increasing the height of the tree).
-			newRoot := Node{keys: []int{separationValue}, children: []*Node{node, &newRightNode}}
+			newRoot := Node{keys: []int{separationValue}, children: []*Node{node, newRightNode}}
 			newRoot.createChildParentPointers()
 			return &newRoot
 		} else {
 			if node.parent.hasRoomForChildren() {
-				node.parent.children = append(node.parent.children, &newRightNode)
+				node.parent.children = append(node.parent.children, newRightNode)
 			} else {
-				node.insertChild(&newRightNode)
+				node.insertChild(newRightNode)
 			}
 				node.parent.createChildParentPointers()
 			return node.parent.insert(separationValue)
@@ -125,7 +122,7 @@ func (node *Node) absoluteRoot() *Node {
 	return node.parent.absoluteRoot()
 }
 
-func splitNode(node *Node, val int) (*Node, *Node) {
+func splitNode(node *Node, val int) (*Node, *Node, int) {
 	temporaryKeySlice := appendAndSort(node.keys, val)
 	medianIndex := K / 2 // What if K is an even number? How to choose median index then?
 
@@ -135,8 +132,9 @@ func splitNode(node *Node, val int) (*Node, *Node) {
 	node.keys = temporaryKeySlice[:medianIndex] // The original node becomes the new left node
 	newRightNode := Node{keys: temporaryKeySlice[medianIndex+1:], children: []*Node{}}
 
-	return node, &newRightNode
+	separationValue := temporaryKeySlice[medianIndex]
 
+	return node, &newRightNode, separationValue
 }
 
 func (node Node) hasChildren() bool {
