@@ -59,19 +59,14 @@ func (node *Node) insert(val int) *Node {
 	} else {
 		// TODO major confusion: newLeftNode and node point to the same object.. rename where appropriate
 		newLeftNode, newRightNode, separationValue := splitNode(node, val)
-
 		splitKeysBetweenNodes(newLeftNode, newRightNode, separationValue)
-
-
-		if node.parent == nil {
-			// If the node has no parent (i.e., the node was the root),
-			// create a new root above this node (increasing the height of the tree).
+		if newLeftNode.parent == nil {
 			newRoot := Node{keys: []int{separationValue}, children: []*Node{newLeftNode, newRightNode}}
 			newRoot.createChildParentPointers()
 			return &newRoot
 		} else {
 			node.parent.insertChild(newRightNode)
-			newLeftNode.parent.createChildParentPointers() // TODO no need to do this for the newRightNode?
+			node.parent.createChildParentPointers() // TODO no need to do this for the newRightNode?
 			return node.parent.insert(separationValue)
 		}
 	}
@@ -106,18 +101,15 @@ func splitNode(node *Node, val int) (*Node, *Node, int) {
 
 func splitKeysBetweenNodes(leftNode *Node, rightNode *Node, separationValue int) {
 	indexesToRemove := []int{}
-	if len(leftNode.children) > 0 {
-		for i, v := range leftNode.children {
-			// TODO should we only ever access the 0th index in v.keys?
-			if v.keys[0] > separationValue {
-				rightNode.children = append(rightNode.children, leftNode.children[i])
-				rightNode.createChildParentPointers()
-				indexesToRemove = append(indexesToRemove, i)
-			}
+	for i, v := range leftNode.children {
+		// TODO should we only ever access the 0th index in v.keys?
+		if v.keys[0] > separationValue {
+			rightNode.children = append(rightNode.children, leftNode.children[i])
+			rightNode.createChildParentPointers()
+			indexesToRemove = append(indexesToRemove, i)
 		}
 	}
-
-	// Remove the redundant node children
+	// Remove the redundant leftNode children
 	indexModifier := 0
 	for _, idx := range indexesToRemove {
 		leftNode.children = append(leftNode.children[:idx+indexModifier], leftNode.children[idx+1+indexModifier:]...)
