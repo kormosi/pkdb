@@ -57,26 +57,11 @@ func (node *Node) insert(val int) *Node {
 		node.keys = appendAndSort(node.keys, val)
 		return node.absoluteRoot()
 	} else {
+		// TODO major confusion: newLeftNode and node point to the same object.. rename where appropriate
 		newLeftNode, newRightNode, separationValue := splitNode(node, val)
 
-		indexesToRemove := []int{}
+		splitKeysBetweenNodes(newLeftNode, newRightNode, separationValue)
 
-		if len(newLeftNode.children) > 0 {
-			for i, v := range newLeftNode.children {
-				// TODO should we only ever access the 0th index in v.keys?
-				if v.keys[0] > separationValue {
-					newRightNode.children = append(newRightNode.children, newLeftNode.children[i])
-					indexesToRemove = append(indexesToRemove, i)
-				}
-			}
-		}
-
-		// Remove the redundant node children
-		indexModifier := 0
-		for _, idx := range indexesToRemove {
-			newLeftNode.children = append(newLeftNode.children[:idx+indexModifier], newLeftNode.children[idx+1+indexModifier:]...)
-			indexModifier-- // Without this we would get `slice bounds out of range` error in this loop
-		}
 
 		if node.parent == nil {
 			// If the node has no parent (i.e., the node was the root),
@@ -85,11 +70,7 @@ func (node *Node) insert(val int) *Node {
 			newRoot.createChildParentPointers()
 			return &newRoot
 		} else {
-			if node.parent.hasRoomForChildren() {
-				node.parent.children = append(node.parent.children, newRightNode)
-			} else {
-				node.insertChild(newRightNode)
-			}
+			node.parent.insertChild(newRightNode)
 			newLeftNode.parent.createChildParentPointers() // TODO no need to do this for the newRightNode?
 			return node.parent.insert(separationValue)
 		}
@@ -121,6 +102,27 @@ func splitNode(node *Node, val int) (*Node, *Node, int) {
 	node.keys = allKeys[:medianIndex] // The original node becomes the new left node
 	newRightNode := Node{keys: allKeys[medianIndex+1:], children: []*Node{}}
 	return node, &newRightNode, separationValue
+}
+
+func splitKeysBetweenNodes(leftNode *Node, rightNode *Node, separationValue int) {
+	indexesToRemove := []int{}
+	if len(leftNode.children) > 0 {
+		for i, v := range leftNode.children {
+			// TODO should we only ever access the 0th index in v.keys?
+			if v.keys[0] > separationValue {
+				rightNode.children = append(rightNode.children, leftNode.children[i])
+				rightNode.createChildParentPointers()
+				indexesToRemove = append(indexesToRemove, i)
+			}
+		}
+	}
+
+	// Remove the redundant node children
+	indexModifier := 0
+	for _, idx := range indexesToRemove {
+		leftNode.children = append(leftNode.children[:idx+indexModifier], leftNode.children[idx+1+indexModifier:]...)
+		indexModifier-- // Without this we would get `slice bounds out of range` error in this loop
+	}
 }
 
 func (node Node) hasChildren() bool {
@@ -157,13 +159,13 @@ func (node *Node) createChildParentPointers() {
 
 func (node *Node) insertChild(nodeToInsert *Node) {
 	// TODO unsure as to why we index into keys[0] here -> investigate
-	for idx, child := range node.parent.children {
+	for idx, child := range node.children {
 		if child.keys[0] > nodeToInsert.keys[0] {
-			node.parent.children = slices.Insert(node.parent.children, idx, nodeToInsert)
+			node.children = slices.Insert(node.children, idx, nodeToInsert)
 			return
 		}
 	}
-	node.parent.children = append(node.parent.children, nodeToInsert)
+	node.children = append(node.children, nodeToInsert)
 }
 
 func buildExampleBTree() Node {
