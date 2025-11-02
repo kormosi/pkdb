@@ -2,10 +2,6 @@
 
 // Regarding BTrees:
 
-// Usually, the number of keys is chosen to vary between d and 2d,
-// where d is the minimum number of keys, and d+1 is the minimum
-// branching factor of the tree.
-
 // Great link that shows the node structure (with data records)
 // https://en.wikipedia.org/wiki/B-tree#Node_structure
 // I will need to re-work my implementation according to this.
@@ -26,10 +22,9 @@ import (
 const K = 3 // Maximum number of potential search keys for each node in a B-tree
 
 type Node struct {
-	keys     []int // length of this cannot exceed K; (it's called keys, but it's also values for now)
+	keys     []int // length of this cannot exceed K;
 	children []*Node
 	parent   *Node
-	// leaf bool	 // possibly needed in future?
 }
 
 // TODO tuto pokračovať, spraviť z toho clean-code novinový kód
@@ -50,6 +45,24 @@ func findNodeSuitableForInsertion(node *Node, val int) *Node {
 	} else {
 		return node
 	}
+}
+
+func (node Node) hasChildren() bool {
+	for _, child := range node.children {
+		if child != nil {
+			return true
+		}
+	}
+	return false
+}
+
+func (node Node) determineChildIndex(val int) int {
+	for idx, key := range node.keys {
+		if val < key {
+			return idx
+		}
+	}
+	return len(node.keys)
 }
 
 func (node *Node) insert(val int) *Node {
@@ -117,32 +130,6 @@ func splitKeysBetweenNodes(leftNode *Node, rightNode *Node, separationValue int)
 	}
 }
 
-func (node Node) hasChildren() bool {
-	for _, child := range node.children {
-		if child != nil {
-			return true
-		}
-	}
-	return false
-}
-
-func (node Node) determineChildIndex(val int) int {
-	for idx, key := range node.keys {
-		if val < key {
-			return idx
-		}
-	}
-	return len(node.keys)
-}
-
-func (node Node) hasRoomForChildren() bool {
-	return len(node.children) < K
-}
-
-func (node Node) containsValue(val int) bool {
-	return slices.Contains(node.keys, val)
-}
-
 func (node *Node) createChildParentPointers() {
 	for _, child := range node.children {
 		child.parent = node
@@ -160,25 +147,31 @@ func (node *Node) insertChild(nodeToInsert *Node) {
 	node.children = append(node.children, nodeToInsert)
 }
 
-func buildExampleBTree() Node {
-	// lowest level - left
-	lowest_l_l := Node{keys: []int{1}, children: []*Node{}}
-	lowest_l_r := Node{keys: []int{3}, children: []*Node{}}
-	// lowest level - right
-	lowest_r_l := Node{keys: []int{5}, children: []*Node{}}
-	lowest_r_r := Node{keys: []int{7}, children: []*Node{}}
-
-	// mid level
-	mid_l := Node{keys: []int{2}, children: []*Node{&lowest_l_l, &lowest_l_r}}
-	mid_r := Node{keys: []int{6}, children: []*Node{&lowest_r_l, &lowest_r_r}}
-
-	// top level
-	root := Node{keys: []int{4}, children: []*Node{&mid_l, &mid_r}}
-
-	return root
+func isInBTree(node Node, val int) bool {
+	if node.containsValue(val) {
+		return true
+	} else {
+		if node.hasChildren() {
+			childToSearchIndex := node.determineChildIndex(val)
+			return isInBTree(*node.children[childToSearchIndex], val)
+		}
+	}
+	return false
 }
 
-func buildEmptyBTree() *Node {
+func (node Node) containsValue(val int) bool {
+	return slices.Contains(node.keys, val)
+}
+
+func buildExampleBTree(values []int) Node {
+	root := createEmptyBTree()
+	for _, val := range values {
+		root = root.insert(val)
+	}
+	return *root
+}
+
+func createEmptyBTree() *Node {
 	children := []*Node{}
 	keys := []int{}
 	root := Node{keys: keys, children: children}
@@ -201,39 +194,6 @@ func printBTree(root Node) {
 	fmt.Println(*root.children[1].children[1])
 }
 
-// TODO maybe this function can be deprecated?
-func isInBTree(node Node, val int) bool {
-	if node.containsValue(val) {
-		return true
-	} else {
-		if node.hasChildren() {
-			childToSearchIndex := node.determineChildIndex(val)
-			return isInBTree(*node.children[childToSearchIndex], val)
-		}
-	}
-	return false
-}
-
 func printSlice(s []int) {
 	fmt.Printf("len=%d cap=%d %v\n", len(s), cap(s), s)
-}
-
-func main() {
-	// root := buildBTree()
-	// printBTree(root)
-
-	// fmt.Println()
-
-	// TODO otestovať to s viacerými hodnotami
-	// fmt.Println(isInBTree(root, 4))
-	// fmt.Println(isInBTree(root, 2))
-	// fmt.Println(isInBTree(root, 1))
-	// fmt.Println(isInBTree(root, 3))
-	// fmt.Println(isInBTree(root, 6))
-	// fmt.Println(isInBTree(root, 5))
-	// fmt.Println(isInBTree(root, 7))
-
-	// fmt.Println(isInBTree(root, 8))
-
-	// buildEmptyBTree()
 }

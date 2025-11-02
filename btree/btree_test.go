@@ -22,7 +22,7 @@ func TestIsInBtree(t *testing.T) {
 		{"9", 9, false},
 	}
 
-	node := buildExampleBTree()
+	node := buildExampleBTree([]int{1, 2, 3, 4, 5, 6, 7})
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -65,7 +65,7 @@ func TestDetermineChild(t *testing.T) {
 }
 
 func TestCreateChildParentPointers(t *testing.T) {
-	node := buildExampleBTree()
+	node := buildExampleBTree([]int{1, 2, 3, 4, 5, 6, 7})
 	node.createChildParentPointers()
 	for _, child := range node.children {
 		if child.parent != &node {
@@ -78,7 +78,7 @@ func TestCreateChildParentPointers(t *testing.T) {
 func TestFindSuitableNodeForInsertion(t *testing.T) {
 	// Not an exhaustive test but we'll hope it's enough for now
 	// Could be made better by creating trees of different levels here as params
-	btree := buildExampleBTree()
+	btree := buildExampleBTree([]int{1, 2, 3, 4, 5, 6, 7})
 	expected := []int{7}
 	nodeFound := findNodeSuitableForInsertion(&btree, 8)
 	if !reflect.DeepEqual(nodeFound.keys, expected) {
@@ -95,7 +95,7 @@ func TestInsertWithNodeSplitting(t *testing.T) {
 	// a tým pádom rýchlo otestovať TestFindSuitableNodeForInsertion - aj keď
 	// je to taký chicken-egg problém, lebo insert samotný používa TestFindSuitableNodeForInsertion
 
-	btree := buildEmptyBTree()
+	btree := createEmptyBTree()
 	btree = btree.Insert(1)
 	expectedKeys := []int{1}
 	if !reflect.DeepEqual(btree.keys, expectedKeys) {
@@ -215,7 +215,7 @@ func TestInsertWithNodeSplitting(t *testing.T) {
 
 func TestInsertRandomValues(t *testing.T) {
 
-	btree := buildEmptyBTree()
+	btree := createEmptyBTree()
 	btree = btree.Insert(4)
 	expectedKeys := []int{4}
 	if !reflect.DeepEqual(btree.keys, expectedKeys) {
